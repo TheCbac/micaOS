@@ -71,6 +71,7 @@
     uint32_t (*getTxBufferSize)(uint8_t *result);           /**< Retrieve number of bytes pending in TX buffer*/
     uint32_t error;
   } COMMS_UART_S;
+
     
   /* I2C */
   typedef struct {

@@ -23,7 +23,8 @@ COMMS_UART_S uart;
 // #define TEST_PRINT_BOOL
 // #define TEST_PRINT_INT
 // #define TEST_PRINT_CHAR
-#define TEST_PRINT_HEX
+// #define TEST_PRINT_HEX
+#define TEST_PRINT_API
 
 
 // #define TEST_PRINT_HEX
@@ -83,15 +84,11 @@ void setup(void){
       uart_print(&uart, "0xCC: 0x%x\r\n",  testVal2);
       uint8_t testVal3 = 0xA1;
       uart_print(&uart, "0xA1: 0x%x\r\n",  testVal3);
-
-
-
-
-
-
-
-
       uart_print(&uart, "End test");
+    #elif defined TEST_PRINT_API
+      Serial.println("TEST_PRINT_API");
+      
+
     #else 
       #error "Must have a test case selected" 
     #endif
