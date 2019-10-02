@@ -41,7 +41,7 @@ uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii){
 }
 
 /*******************************************************************************
-* Function Name: uart_print()
+* Function Name: print()
 ****************************************************************************//**
 *
 * \brief Prints out the string
@@ -52,7 +52,7 @@ uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii){
 * \return
 * The error code of the operation
  *******************************************************************************/
-uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...){
+uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
   uint32_t error = COMMS_ERROR_NONE;
   /* Validate  state */
   error = Comms_validateUart(uart);
@@ -179,10 +179,11 @@ uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...){
 
 
 /*******************************************************************************
-* Function Name: uart_printHeader()
+* Function Name: printHeaderDT()
 ****************************************************************************//**
 *
-* \brief Displays the program header
+* \brief Displays the program header with Date and time option. Use the macro 
+*   'printHeader' for automatically filling date and time. 
 * 
 * \param name
 *    Name of the program to display 
@@ -198,12 +199,12 @@ uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...){
 * \return
 * The error code of the operation
 *******************************************************************************/
-uint32_t uart_printHeader(COMMS_UART_S* uart, uint8_t* name, uint8_t *date, uint8_t* time){
+uint32_t printHeaderDT(COMMS_UART_S* uart, const char* name, const char *date, const char* time){
   uint32_t error = COMMS_ERROR_NONE;
-  error |= uart_print(uart, CLEAR_SCREEN_CMD);
-  error |= uart_print(uart, "**************************************\r\n*");
-  error |= uart_print(uart, "%s\r\n*\r\n* Compiled at: %s on %s", name, time, date);
-  error |= uart_print(uart, "\r\n**************************************\r\n");
+  printLn(uart, CLEAR_SCREEN_CMD);
+  printLn(uart, "**************************************");
+  error |= print(uart, "* %s\r\n*\r\n* Compiled at: %s on %s", name, time, date);
+  error |= print(uart, "\r\n**************************************\r\n");
   return error;
 }
 
@@ -226,12 +227,12 @@ uint32_t uart_printHeader(COMMS_UART_S* uart, uint8_t* name, uint8_t *date, uint
 * \return
 * The error code of the operation
 *******************************************************************************/
-uint32_t uart_compareReg(COMMS_UART_S* uart, uint8_t* name, uint16_t actual, uint16_t expected){
-  return uart_print(uart, "%s: Received: 0x%x; Expected: 0x%x", name, actual, expected);
+uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, uint16_t expected){
+  return print(uart, "%s: Received: 0x%x; Expected: 0x%x", name, actual, expected);
 }
 
 /*******************************************************************************
-* Function Name: uart_printErrorStatus()
+* Function Name: printErrorStatus()
 ****************************************************************************//**
 *
 * \brief Prints the results of a test
@@ -249,12 +250,12 @@ uint32_t uart_compareReg(COMMS_UART_S* uart, uint8_t* name, uint16_t actual, uin
 * \return
 * The error code of the operation
 *******************************************************************************/
-uint32_t uart_printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError) {
+uint32_t printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError) {
   uint32_t e = COMMS_ERROR_NONE;
   if(error){
-    e |= uart_print(uart, "Error %s: 0x%x suberror: 0x%x", name, error, subError);
+    e |= print(uart, "Error %s: 0x%x suberror: 0x%x", name, error, subError);
   } else {
-    e |= uart_print(uart, "Success: %s", name);
+    e |= print(uart, "Success: %s", name);
   }
   return e;
 }

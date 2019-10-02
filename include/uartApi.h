@@ -37,15 +37,17 @@
   /***************************************
   * Function declarations 
   ***************************************/
-  uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...);
-  uint32_t uart_printHeader(COMMS_UART_S* uart, uint8_t* name, uint8_t *date, uint8_t* time);
-  uint32_t uart_compareReg(COMMS_UART_S* uart, uint8_t* name, uint16_t actual, uint16_t expected);
-  uint32_t uart_printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError);
+  uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...);
+  uint32_t printHeaderDT(COMMS_UART_S* uart, const char* name, const char *date, const char* time);
+  uint32_t printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError);
   uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii);
+  uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, uint16_t expected);
+
   
 
 
-  #define uart_printLn(...) do {uart_print(__VA_ARGS__); uart_print("\r\n"); } while(0) 
+  #define printLn(uart, ...) do {print(uart, __VA_ARGS__); print(uart, "\r\n"); } while(0) 
+  #define printHeader(uart, name) printHeaderDT(uart, name, __DATE__, __TIME__)
     
 #endif /* UART_API_H */
 /* [] END OF FILE */
