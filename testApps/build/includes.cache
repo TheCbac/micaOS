@@ -1,0 +1,32 @@
+[
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino"
+  },
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\eightanaloginputs"
+  },
+  {
+    "Sourcefile": "c:\\Users\\ccheney\\git\\micaOS\\testApps\\build\\sketch\\serialArduino.ino.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "c:\\Users\\ccheney\\git\\micaOS\\testApps\\build\\sketch\\Arduino_serial.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "c:\\Users\\ccheney\\git\\micaOS\\testApps\\build\\sketch\\micaComms.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "c:\\Users\\ccheney\\git\\micaOS\\testApps\\build\\sketch\\uartApi.cpp",
+    "Include": "",
+    "Includepath": ""
+  }
+]

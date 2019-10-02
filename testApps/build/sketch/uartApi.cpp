@@ -176,6 +176,110 @@ uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...){
   }
   return error;
 }
+// uint32_t uart_print(COMMS_UART_S* uart, const char *pszFmt,...){
+//   uint32_t error = COMMS_ERROR_NONE;
+//   /* Validate  state */
+//   error = Comms_validateUart(uart);
+//   if(!error) {
+//     va_list args;
+//     uint8_t arg;
+//     va_start(args, pszFmt);
+
+//     uint8_t *pszVal;
+//     uint32_t iVal, xVal, i = 0, buffer[12], index = 1;
+//     uint8_t cVal;
+//     uint32_t *pArg;
+//     pArg =(uint32_t *)&pszFmt;
+//     /* Iterate through string */
+//     while(*pszFmt) {
+//       /* Regular Character */
+//       if('%' != *pszFmt) {
+//         error |= uart->write(*pszFmt);
+//         pszFmt++;
+//         continue;
+//       }
+//       pszFmt++;
+//       /* Format a string */
+//       if(*pszFmt == 's') {
+//         // pszVal = (uint8_t*)pArg[index++];
+//         // for(; *pszVal != '\0'; pszVal++){
+//         //   error |= uart->write(*pszVal);
+//         // }
+//         arg = va_arg(args, uint8_t);
+//         for(; arg!= '\0'; arg = va_arg(args, uint8_t)){
+//           error |= uart->write(arg);
+//         }
+//         pszFmt++;
+//         continue;
+//       }
+//       /* Boolean */
+//       if(*pszFmt == 'b'){
+//         bool bVal = (bool) pArg[index++];
+//         if(bVal){
+//             uart->print("True");
+//         } else {
+//             uart->print("False");
+//         }
+//         pszFmt++;
+//         continue;
+//       }
+//       /* Format integer */
+//       if(*pszFmt == 'd' || *pszFmt == 'i') {
+//         iVal = pArg[index++];
+//         i = 0;
+//         do{
+//           buffer[i++] = iVal % 10;
+//           iVal /= 10;
+//         }while(iVal);
+//         while(i > 0){
+//           i--;
+//           uint8_t ascii = 0;
+//           error |= uart_hex2Ascii(buffer[i], &ascii);
+//           error |= uart->write(ascii);
+//         }
+//         pszFmt++;
+//         continue;
+//       }
+//       /* Character */
+//       if(*pszFmt == 'c') {
+//         cVal = (uint8_t)pArg[index++];
+//         error |= uart->write(cVal);
+//         pszFmt++;
+//         continue;
+//       }
+//       /* Hex val */
+//       if(*pszFmt == 'x') {
+//         xVal = pArg[index++];
+//         i = 0;
+//         do{
+//           buffer[i++] = xVal % HEX_VAL_MAX;
+//           xVal /= HEX_VAL_MAX;
+//         }while(xVal);
+//         if(i%2!=0){
+//           buffer[i++]=0;
+//         }
+//         if(i<2) {
+//           buffer[i++]=0;
+//         }
+
+//         while(i > 0){
+//           i--;
+//           uint8_t ascii = 0;
+//           error |= uart_hex2Ascii(buffer[i], &ascii);
+//           error |= uart->write(ascii);
+//         }
+//         pszFmt++;
+//         continue;
+//       }
+//       if(pszFmt == '\0'){
+//           break;
+//       }
+//     }
+//     va_end(args);
+//   }
+//   return error;
+// }
+
 
 
 /*******************************************************************************
