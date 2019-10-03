@@ -57,6 +57,7 @@ uint32_t Comms_validateUart(COMMS_UART_S *uart){
 *******************************************************************************/
 uint32_t Comms_validateI2C(COMMS_I2C_S *i2c){
   uint32_t error = COMMS_ERROR_NONE;
+  error |= (i2c == NULL)              ? COMMS_ERROR_I2C : COMMS_ERROR_NONE; 
   error |= (i2c->write == NULL)       ? COMMS_ERROR_WRITE : COMMS_ERROR_NONE;
   error |= (i2c->writeCmd == NULL)    ? COMMS_ERROR_WRITE_CMD : COMMS_ERROR_NONE;
   error |= (i2c->writeArray == NULL)  ? COMMS_ERROR_WRITE_ARRAY : COMMS_ERROR_NONE;

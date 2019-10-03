@@ -253,9 +253,9 @@ uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, 
 uint32_t printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError) {
   uint32_t e = COMMS_ERROR_NONE;
   if(error){
-    e |= print(uart, "Error %s: 0x%x suberror: 0x%x", name, error, subError);
+    e |= print(uart, "Error: %s - 0x%x suberror: 0x%x\r\n", name, error, subError);
   } else {
-    e |= print(uart, "Success: %s", name);
+    e |= print(uart, "Success: %s\r\n", name);
   }
   return e;
 }
