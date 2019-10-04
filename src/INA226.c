@@ -52,11 +52,11 @@ uint32_t INA226_writeReg(INA226_STATE_S* state, uint8_t regAddr, uint16_t val){
     uint8_t lsdb = (val & MASK_BYTE_ONE);
     uint8_t sendArray[2] = {msdb, lsdb};
     uint32_t i2cError = state->i2c->writeArray(state->deviceAddr, regAddr, sendArray, 2);
-    // /* Place output error in the state struct */
-    // error |= i2cError ? COMMS_ERROR_I2C : COMMS_ERROR_NONE;
-    // if (error) {
-    //   state->error = i2cError;
-    // }
+    /* Place output error in the state struct */
+    error |= i2cError ? COMMS_ERROR_I2C : COMMS_ERROR_NONE;
+    if (error) {
+      state->error = i2cError;
+    }
   }
   return error;
 }
@@ -125,7 +125,7 @@ uint32_t INA226_reset(INA226_STATE_S* state) {
 *  Enables operation of the device and checks for connectivity
 *
 * \param [in/out] state
-*  Pointer to the DAC5578 State structure
+*  Pointer to the INA226 State structure
 *
 * \return
 *  Error code of the procedure
@@ -141,20 +141,151 @@ uint32_t INA226_start(INA226_STATE_S* state) {
       state->error = readVal;
     }
   }
+  /* Reset the device */
+  if(!error){
+    error |= INA226_reset(state);
+  }
+  /* Configuration register */
+  if(!error) {
+    uint16_t config = 0;
+    /* AVG - 16 averages, continuous monitoring */
+    config |= INA_CONFIG_AVG_16;
+    /* VBUSTCT - 1.1 ms */
+    config |= INA_CONFIG_VBUSCT_1100;
+    /* VSHCT - 1.1 ms */
+    config |= INA_CONFIG_VSHCT_1100;
+    /* MODE - Shunt & Bus continuous */
+    config |= INA_CONFIG_MODE_CONT_SH_BUS;
+    /* RES - Add reserved bit back in  */
+    config |= INA_CONFIG_MASK_RES1;
+    /* Write out value */
+    error |= INA226_writeReg(state, INA226_ADDR_CONFIG, config);
+  }
+  /* Calibartion register */
+  if(!error){
+    /* Calculate the Current LSB */
+    state->currentLsb = state->maxCurrent / INA_CURRENT_LSB_SCALE;
+    /* Calculate the calibration constant */
+    state->calibration = INA_CAL_SCALE / (state->currentLsb * state->rShunt);
+    /* Write out the calibration register */
+    error |= INA226_writeReg(state, INA226_ADDR_CALIBRATION, (uint16_t) state->calibration );
+
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: INA226_readVoltage_Bus()
+****************************************************************************//**
+* \brief
+*  Reads the bus voltage present
+*
+* \param [in/out] state
+*  Pointer to the INA226 State structure
+*
+* \param val [out]
+*  Voltage in units of Volts 
+*
+* \return
+*  Error code of the procedure
+*******************************************************************************/
+uint32_t INA226_readVoltage_Bus(INA226_STATE_S* state, float* val){
+  uint16_t regVal = 0;
+  uint32_t error = INA226_readReg(state, INA226_ADDR_BUS, &regVal);
+  /* Convert to Volts */
+  if(!error){
+    regVal &= INA_VBUS_MASK;
+    *val = regVal * INA_VBUS_LSB;
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: INA226_readVoltage_Shunt()
+****************************************************************************//**
+* \brief
+*  Reads the shunt voltage present
+*
+* \param [in/out] state
+*  Pointer to the INA226 State structure
+*
+* \param val [out]
+*  Voltage in units of Volts 
+*
+* \return
+*  Error code of the procedure
+*******************************************************************************/
+uint32_t INA226_readVoltage_Shunt(INA226_STATE_S* state, float* val){
+  uint16_t regVal = 0;
+  float vShunt = 0;
+  float sign = 1;
+  uint32_t error = INA226_readReg(state, INA226_ADDR_SHUNT, &regVal);
+  /* Convert to Volts */
+  if(!error){
+    /* Check if negative */
+    if(regVal & INA_SIGN_BIT){
+      sign = -1;
+      /* Mask off the sign bit */
+      regVal &= (~INA_SIGN_BIT);
+      /* Convert from Two's complement to Binary */
+      regVal -= 1;
+      regVal = ~regVal;
+    }
+    /* Convert to Volts */
+    vShunt = INA_VSHUNT_LSB * regVal;
+    *val = sign * vShunt;
+  }
+  return error;
+}
 
 
-  // if(!error){
-  //   /* Reset the device */
-  //   error |= INA226_reset(state);
-  // }
-  // }
-  // /* Configure device */
-  // if(!error) {
-  //   /* 16 averages, continuous monitoring */
-  //   uint16_t config = INA_CONFIG_AVG_16 | INA_CONFIG_MODE_CONT_SH_BUS;
-  //   error |= INA226_writeReg(state, INA226_ADDR_CONFIG, config);
+/*******************************************************************************
+* Function Name: INA226_readCurrent()
+****************************************************************************//**
+* \brief
+*  Reads the current register and converts to units of Amps
+*
+* \param [in/out] state
+*  Pointer to the INA226 State structure
+*
+* \param val [out]
+*  Current in units of A
+*
+* \return
+*  Error code of the procedure
+*******************************************************************************/
+uint32_t INA226_readCurrent(INA226_STATE_S* state, float* val){
+  uint16_t regVal = 0;
+  uint32_t error = INA226_readReg(state, INA226_ADDR_CURRENT, &regVal);
+  /* Convert to Amps */
+  if(!error){
+    *val = regVal * state->currentLsb;
+  }
+  return error;
+}
 
-  // }
+/*******************************************************************************
+* Function Name: INA226_readPower()
+****************************************************************************//**
+* \brief
+*  Reads the power register and converts to units of Wants
+*
+* \param [in/out] state
+*  Pointer to the INA226 State structure
+*
+* \param val [out]
+*  Power in units of [W]
+*
+* \return
+*  Error code of the procedure
+*******************************************************************************/
+uint32_t INA226_readPower(INA226_STATE_S* state, float* val){
+  uint16_t regVal = 0;
+  uint32_t error = INA226_readReg(state, INA226_ADDR_POWER, &regVal);
+  /* Convert to Amps */
+  if(!error){
+    *val = regVal * state->currentLsb * INA_POWER_SCALE;
+  }
   return error;
 }
 

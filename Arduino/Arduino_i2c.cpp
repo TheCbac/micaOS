@@ -119,14 +119,14 @@ uint32_t i2cArduino_writeCmd(uint8_t deviceAddr, uint8_t cmd){
 *******************************************************************************/
 uint32_t i2cArduino_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len){
   uint32_t error = COMMS_ERROR_NONE;
-  // if(len >= I2C_ARDUINO_LEN_ARRAY){
-  //   error = COMMS_ERROR_RANGE;
-  // } else {
-    // Wire.beginTransmission(deviceAddr);
-    // Wire.write(regAddr);
-    // Wire.write(array, len);
-    // Wire.endTransmission();
-  // }
+  if(len >= I2C_ARDUINO_LEN_ARRAY){
+    error = COMMS_ERROR_RANGE;
+  } else {
+    Wire.beginTransmission(deviceAddr);
+    Wire.write(regAddr);
+    Wire.write(array, len);
+    Wire.endTransmission();
+  }
   return error;
 }
 

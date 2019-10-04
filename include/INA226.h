@@ -53,6 +53,7 @@
   #define INA_CONFIG_SHIFT_AVG0       (9) /**< Shift for the Averaging mode 0 flag */
   #define INA_CONFIG_SHIFT_AVG1       (10) /**< Shift for the Averaging mode 1 flag */
   #define INA_CONFIG_SHIFT_AVG2       (11) /**< Shift for the Averaging mode 2 flag */
+  #define INA_CONFIG_SHIFT_RES1       (14) /**< Shift for the reserved bit*/
   #define INA_CONFIG_SHIFT_RST        (15) /**< Shift for Reset flag */
   #define INA_CONFIG_MASK_MODE1       (1u << INA_CONFIG_SHIFT_MODE1) /**< Mask for the Mode 1 flag */
   #define INA_CONFIG_MASK_MODE2       (1u << INA_CONFIG_SHIFT_MODE2) /**< Mask for the Mode 2 flag */
@@ -66,6 +67,7 @@
   #define INA_CONFIG_MASK_AVG0        (1u << INA_CONFIG_SHIFT_AVG0) /**< Mask for the Averaging mode 0 flag */
   #define INA_CONFIG_MASK_AVG1        (1u << INA_CONFIG_SHIFT_AVG1) /**< Mask for the Averaging mode 1 flag */
   #define INA_CONFIG_MASK_AVG2        (1u << INA_CONFIG_SHIFT_AVG2) /**< Mask for the Averaging mode 2 flag */
+  #define INA_CONFIG_MASK_RES1        (1u << INA_CONFIG_SHIFT_RES1) /**< Mask for the reserved bit*/ 
   #define INA_CONFIG_MASK_RST         (1u << INA_CONFIG_SHIFT_RST) /**< Mask for Reset flag */
 
   #define INA_CONFIG_AVG_1            (0x0 << INA_CONFIG_SHIFT_AVG0) /**< Value for 1 average */
@@ -133,6 +135,17 @@
   #define INA_ENABLE_MASK_SUL         (1u << INA_ENABLE_SHIFT_SUL) /**< Flag  of the Shunt Under-voltage bit */
   #define INA_ENABLE_MASK_SOL         (1u << INA_ENABLE_SHIFT_SOL) /**< Flag  of the Shunt over-voltage bit */
 
+  /* VSHUNT */
+  #define INA_VSHUNT_LSB              (0.0000025f) /* Value in Volts of a LSB */   
+  #define INA_VSHUNT_MASK             (0x7FFF) /* Full range of the VBUS register */
+  #define INA_SIGN_BIT                (1u << 15)  /* Twos complement sign bit */
+  #define INA_CURRENT_LSB_SCALE       (32768) /* Scaling factor for the device */
+  #define INA_CAL_SCALE               (0.00512) /* Scaling factor for the calibration reg */
+  #define INA_POWER_SCALE             (25) /* Fixed scale for Power conversion */
+  /* VBUS  */
+  #define INA_VBUS_LSB                (0.00125f) /* Value in Volts of a LSB */   
+  #define INA_VBUS_MASK               (0x7FFF) /* Full range of the VBUS register */
+
   /* MFG ID */
   #define INA_ID_MFG_VAL              (0x5449) /*<< Manufacturer ID */
 
@@ -152,6 +165,10 @@
     COMMS_I2C_S *i2c;       /**< Pointer to the I2C comms struct */      
     uint32_t error;         /**< Functions that exit with an error use this to transmit info out */
     uint8_t deviceAddr;     /**< Address of the device to communicate with */
+    float maxCurrent;       /**< Maximum expected current in units of Amperes */
+    float rShunt;           /**< Value of the shunt resistor in units of Ohms */
+    float currentLsb;       /**< Internal use only, do not set directly */
+    float calibration;      /**< Internal use only, do not set directly */
   } INA226_STATE_S; 
   
   /***************************************
@@ -161,7 +178,10 @@
   uint32_t INA226_readReg(INA226_STATE_S* state, uint8_t regAddr, uint16_t* val);
   uint32_t INA226_reset(INA226_STATE_S* state);
   uint32_t INA226_start(INA226_STATE_S* state);
-
+  uint32_t INA226_readVoltage_Bus(INA226_STATE_S* state, float* val);
+  uint32_t INA226_readVoltage_Shunt(INA226_STATE_S* state, float* val);
+  uint32_t INA226_readCurrent(INA226_STATE_S* state, float* val);
+  uint32_t INA226_readPower(INA226_STATE_S* state, float* val);
 
 
 #endif /* INA226_H */
