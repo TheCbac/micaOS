@@ -45,7 +45,9 @@
     #define SIXTEEN         (16u)   /**< Constant 16 */
     
     #define NULL_OCTET      (0u)    /**< Null Octet */
-    #define NULL            (0)
+    #ifndef NULL
+        #define NULL            (0)
+    #endif /* NULL */
     
     #define PI              (3.14159265358979f) /**< Pi */
     

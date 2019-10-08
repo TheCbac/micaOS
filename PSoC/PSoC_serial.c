@@ -1,21 +1,28 @@
 /***************************************************************************
-*                                 MICA  © 2019
+*                              MICA  © 2019
+*                               
 *
-* File: Arduino_serial.cpp
+* File: PSoC_serial.c
 * Workspace: micaOS
-* Version: v2.0.0
-* Author: Craig Cheney
+* Project: micaOS
+* Version: 5.0.0
+* Authors: C. Cheney
+* 
+* PCB: N/A N/A
+* mcuType: PSoC
+* partNumber:N/A
 *
 * Brief:
-*   
+*   API Wrapper for using a serial port on the PSoC
 *
-* <date>  - Document Created
+* 2019.10.08  - Document Created
 ********************************************************************************/
-#include "Arduino_serial.h"
-#include "Arduino.h"
+#include "PSoC_serial.h"
+#include "micaCommon.h"
+#include "project.h"
 
 /*******************************************************************************
-* Function Name: uartArduino_start()
+* Function Name: uartPsoc_start()
 ****************************************************************************//**
 * \brief Registers Serial functions
 *
@@ -25,23 +32,24 @@
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_start(COMMS_UART_S* uart, uint32_t baud) {
+uint32_t uartPsoc_start(COMMS_UART_S* uart, uint32_t baud) {
+  /* Baud rate set at compile time */
+  (void) baud;
   /* Register the Arduino commands and start */
-  uart->write = uartArduino_write;
-  uart->print = uartArduino_print;
-  uart->writeArray = uartArduino_writeArray;
-  uart->read = uartArduino_read;
-  uart->readArray = uartArduino_readArray;
-  uart->getRxBufferSize = uartArduino_getRxBufferSize;
-  uart->getTxBufferSize = uartArduino_getTxBufferSize;
-  Serial.begin(baud);
+  uart->write = uartPsoc_write;
+  uart->print = uartPsoc_print;
+  uart->writeArray = uartPsoc_writeArray;
+  uart->read = uartPsoc_read;
+  uart->readArray = uartPsoc_readArray;
+  uart->getRxBufferSize = uartPsoc_getRxBufferSize;
+  uart->getTxBufferSize = uartPsoc_getTxBufferSize;
+  /* Start the serial port */
+  uartUsb_Start();
   return COMMS_ERROR_NONE;
 }
 
-
-
 /*******************************************************************************
-* Function Name: uartArduino_write()
+* Function Name: uartPsoc_write()
 ****************************************************************************//**
 * \brief Registers Write out a byte of data via UART
 *
@@ -51,13 +59,13 @@ uint32_t uartArduino_start(COMMS_UART_S* uart, uint32_t baud) {
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_write(uint8_t val){
-  Serial.write(val);
+uint32_t uartPsoc_write(uint8_t val){
+  uartUsb_UartPutChar(val);
   return COMMS_ERROR_NONE;
 }
 
 /*******************************************************************************
-* Function Name: uartArduino_print()
+* Function Name: uartPsoc_print()
 ****************************************************************************//**
 * \brief Write out a null-pointer string 
 *
@@ -67,13 +75,13 @@ uint32_t uartArduino_write(uint8_t val){
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_print(const char* str){
-  Serial.print(str);
+uint32_t uartPsoc_print(const char* str){
+  uartUsb_UartPutString(str);
   return COMMS_ERROR_NONE;
 }
 
 /*******************************************************************************
-* Function Name: uartArduino_writeArray()
+* Function Name: uartPsoc_writeArray()
 ****************************************************************************//**
 * \brief Write out an array of data
 *
@@ -83,13 +91,14 @@ uint32_t uartArduino_print(const char* str){
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_writeArray(uint8_t *array, uint16_t len){
-  Serial.write(array, len);
+uint32_t uartPsoc_writeArray(uint8_t *array, uint16_t len){
+    uartUsb_SpiUartPutArray(array, len);
   return COMMS_ERROR_NONE;
 }
 
+
 /*******************************************************************************
-* Function Name: uartArduino_read()
+* Function Name: uartPsoc_read()
 ****************************************************************************//**
 * \brief Returns a byte of data from the RX buffer
 *
@@ -99,10 +108,11 @@ uint32_t uartArduino_writeArray(uint8_t *array, uint16_t len){
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_read(uint8_t *result){
+uint32_t uartPsoc_read(uint8_t *result){
   uint32_t error = COMMS_ERROR_NONE;
-  int read = Serial.read();
-  if(read < 0 ){
+  uint32_t read = uartUsb_UartGetChar();
+  /* See if error flag is set */
+  if(read & 0xFFFFFF00){
     error = COMMS_ERROR_READ;
     *result = 0;
   } else {
@@ -113,7 +123,7 @@ uint32_t uartArduino_read(uint8_t *result){
 
 
 /*******************************************************************************
-* Function Name: uartArduino_readArray()
+* Function Name: uartPsoc_readArray()
 ****************************************************************************//**
 * \brief Reads a specified number of bytes into the array
 *
@@ -126,14 +136,23 @@ uint32_t uartArduino_read(uint8_t *result){
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_readArray(uint8_t *resultArray, uint16_t len){ 
+uint32_t uartPsoc_readArray(uint8_t *resultArray, uint16_t len){ 
   uint32_t error = COMMS_ERROR_NONE;
-  Serial.readBytes(resultArray, len);
+  uint16_t i;
+  for(i = 0; i < len; i++){
+    uint8_t readVal;
+    error = uartPsoc_read(&readVal);
+    if(error) {
+      break;
+    } else {
+      resultArray[i] = readVal;
+    }
+  }
   return error;
 }
 
 /*******************************************************************************
-* Function Name: uartArduino_getRxBufferSize()
+* Function Name: uartPsoc_getRxBufferSize()
 ****************************************************************************//**
 * \brief Gets the number of bytes in the RX buffer
 *
@@ -143,14 +162,14 @@ uint32_t uartArduino_readArray(uint8_t *resultArray, uint16_t len){
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_getRxBufferSize(uint8_t *result) {
+uint32_t uartPsoc_getRxBufferSize(uint8_t *result) {
   uint32_t error = COMMS_ERROR_NONE;
-  *result = Serial.available();
+  *result = uartUsb_SpiUartGetRxBufferSize();
   return error;
 }
 
 /*******************************************************************************
-* Function Name: uartArduino_getTxBufferSize()
+* Function Name: uartPsoc_getTxBufferSize()
 ****************************************************************************//**
 * \brief Gets the number of bytes in the TX buffer
 *
@@ -160,10 +179,11 @@ uint32_t uartArduino_getRxBufferSize(uint8_t *result) {
 * \return
 *  Success
 *******************************************************************************/
-uint32_t uartArduino_getTxBufferSize(uint8_t *result){
+uint32_t uartPsoc_getTxBufferSize(uint8_t *result){
   uint32_t error = COMMS_ERROR_NONE;
-  *result = Serial.availableForWrite();
+  *result = uartUsb_SpiUartGetTxBufferSize();
   return error;
 }
+
 
 /* [] END OF FILE */

@@ -32,6 +32,7 @@
 *******************************************************************************/
 uint32_t Comms_validateUart(COMMS_UART_S *uart){
   uint32_t error = COMMS_ERROR_NONE;
+  error |= (uart == NULL)               ? COMMS_ERROR_START : COMMS_ERROR_NONE;
   error |= (uart->write == NULL)       ? COMMS_ERROR_WRITE : COMMS_ERROR_NONE;
   error |= (uart->print == NULL) ? COMMS_ERROR_WRITE_ARRAY : COMMS_ERROR_NONE;
   error |= (uart->writeArray == NULL)  ? COMMS_ERROR_WRITE_ARRAY : COMMS_ERROR_NONE;
