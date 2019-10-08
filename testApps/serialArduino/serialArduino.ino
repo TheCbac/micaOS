@@ -13,10 +13,12 @@
 ********************************************************************************/
 // #include "micaComms.h"
 #include "Arduino_serial.h"
+#include "Arduino_timing.h"
 #include "uartApi.h"
+#include "micaTiming.h"
 
 COMMS_UART_S uart;
-
+TIMING_S timing;
 
 #define TEST
 // #define TEST_PRINT
@@ -24,8 +26,9 @@ COMMS_UART_S uart;
 // #define TEST_PRINT_BOOL
 // #define TEST_PRINT_INT
 // #define TEST_PRINT_CHAR
-#define TEST_PRINT_HEX
+// #define TEST_PRINT_HEX
 // #define TEST_PRINT_API
+#define TEST_UART_ECHO
 
 
 // #define TEST_PRINT_HEX
@@ -39,6 +42,7 @@ COMMS_UART_S uart;
 *******************************************************************************/
 void setup(void){
   uartArduino_start(&uart, COMMS_DEFAULT_BAUD);
+  timingArduino_start(&timing);
 
   #ifdef TEST
     #ifdef TEST_PRINT
@@ -98,6 +102,9 @@ void setup(void){
       uart1.uartState = &uart;
       uart1.print
 
+    #elif defined TEST_UART_ECHO
+      printHeader(&uart, "TEST_UART_ECHO");
+
     #else 
       #error "Must have a test case selected" 
     #endif
@@ -114,7 +121,18 @@ void setup(void){
 * 
 *******************************************************************************/
 void loop(void) {
-
+  #ifdef TEST
+    #if defined TEST_UART_ECHO
+      uint8_t numAvail;
+      uart.getRxBufferSize(&numAvail);
+      if(numAvail) {
+        uint8_t data;
+        uart.read(&data);
+        uart.write(data);
+      }
+      timing.delayMs(10);
+    #endif /* TEST_CASE */
+  #endif /* TEST */
 }
 
 /* [] END OF FILE */

@@ -2,6 +2,7 @@
 for %%x in (
   micaComms
   micaCommon
+  micaTiming
   uartApi
 ) do (
   IF EXIST %%x.h DEL /F %%x.h
@@ -20,6 +21,7 @@ for %%x in (
 
 for %%x in (
   Arduino_serial
+  Arduino_timing
 ) do (
   IF EXIST %%x.h DEL /F %%x.h
   IF EXIST %%x.cpp DEL /F %%x.cpp
