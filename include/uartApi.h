@@ -42,8 +42,8 @@
   uint32_t printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, uint32_t subError);
   uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii);
   uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, uint16_t expected);
+  uint32_t writeArray_rev(COMMS_UART_S* uart, uint8_t *array, uint16_t len);
 
-  
 
 
   #define printLn(uart, ...) do {print(uart, __VA_ARGS__); print(uart, "\r\n"); } while(0) 

@@ -12,10 +12,18 @@
 * 2019.10.01  - Document Created
 ********************************************************************************/
 #include "uartApi.h"
-#include "stdbool.h"
-#include "stdarg.h"
+#include <stdbool.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <float.h>
 
 uint8_t hexAscii[HEX_VAL_MAX+1] = "0123456789ABCDEF";
+/* Powers of 10 */
+static const double pow10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
+
+#define UART_FLOAT_BUFFER_SIZE    (32u)
+#define UART_MAX_FLOAT            (1e9)
+#define UART_FLOAT_DEFAULT_PREC   (6u)
 /*******************************************************************************
 * Function Name: uart_changeBase()
 ****************************************************************************//**
@@ -78,8 +86,9 @@ uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
         pszFmt++;
         continue;
       }
+
       /* Boolean */
-      if(*pszFmt == 'b'){
+      else if(*pszFmt == 'b'){
         bool bVal = (bool) va_arg(args, int);
         if(bVal){
             uart->print("True");
@@ -90,7 +99,7 @@ uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
         continue;
       }
       /* Format integer */
-      if(*pszFmt == 'd' || *pszFmt == 'i') {
+      else if(*pszFmt == 'd' || *pszFmt == 'i') {
         int iVal = va_arg(args, int);
         uint8_t i = 0;
         uint8_t buffer[25];
@@ -108,14 +117,14 @@ uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
         continue;
       }
       /* Character */
-      if(*pszFmt == 'c') {
+      else if(*pszFmt == 'c') {
         uint8_t cVal = (uint8_t) va_arg(args, int);
         error |= uart->write(cVal);
         pszFmt++;
         continue;
       }
       /* Hex val - 16 bits */
-      if(*pszFmt == 'x') {
+      else if(*pszFmt == 'x') {
         uint16_t hexVal = (uint16_t) va_arg(args, int);
         uint32_t i = 0;
         uint32_t buffer[12] = {0};
@@ -141,7 +150,7 @@ uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
       }
 
       /* Hex val - 32 bits */
-      if(*pszFmt == 'X') {
+      else if(*pszFmt == 'X') {
         uint32_t hexVal = (uint32_t) va_arg(args, long);
         uint32_t i = 0;
         uint32_t buffer[12] = {0};
@@ -165,6 +174,123 @@ uint32_t print(COMMS_UART_S* uart, const char *pszFmt,...){
         pszFmt++;
         continue;
       }
+      /* Float */
+      else if(*pszFmt == 'f' || *pszFmt == '.') {
+        /* Get the precision */
+        uint8_t prec = UART_FLOAT_DEFAULT_PREC;
+        if(*pszFmt == '.'){
+          ++pszFmt;
+          prec = *pszFmt - '0';
+          ++pszFmt;
+        }
+        uint8_t buf[UART_FLOAT_BUFFER_SIZE];
+        size_t len =0u;
+        double diff = 0.0;
+        double val = va_arg(args, double);
+
+
+        /* Test for special values */
+        if(val != val){
+          uart->print("NaN");
+          pszFmt++;
+          continue;
+        }
+        else if (val < -DBL_MAX){
+          uart->print("fni-");
+          pszFmt++;
+          continue;
+        }
+        else if (val > DBL_MAX) {
+          uart->print("fni+");
+          pszFmt++;
+          continue;
+        }
+        /* Test for large numbers */
+        if( (val > UART_MAX_FLOAT) || (val < -UART_MAX_FLOAT) ) {
+          uart->print("*reqEXP*");
+          pszFmt++;
+          continue;
+        }
+        /* Test for negative */
+        bool neg = false;
+        if(val < 0){
+          neg = true;
+          val = 0-val;
+        }
+        /* Ignore precision for now */
+        while((len < UART_FLOAT_BUFFER_SIZE) && (prec > 9u)){
+          buf[len++] = '0';
+          prec--;
+        }
+
+        int whole = (int) val;
+        double tmp = (val - whole) * pow10[prec];
+        unsigned long frac = (unsigned long) tmp;
+        diff = tmp - frac;
+
+        if(diff > 0.5){
+          ++frac;
+          /* Handle rollover, e.g. case 0.99 with prec 1 is 1.0 */
+          if(frac >= pow10[prec]){
+            frac = 0;
+            ++whole;
+          }
+        }
+        else if (diff < 0.5) {}
+        else if ((frac == 0u) || (frac &1u)){
+          /* if halfware round up if odd or if last digit is 0 */
+          ++frac;
+        }
+
+        if(prec == 0u){
+          diff = val - (double) whole;
+          if((!(diff < 0.5) || (diff > 0.5)) && (whole & 1)) {
+            /* Exactly 0.5 and ODD, round up */
+            /* 1.5 -> 2, 2.5->2 */
+            ++whole;
+          }
+        }
+        else {
+          unsigned int count  = prec;
+          /* Compute fractional part */
+          while (len < UART_FLOAT_BUFFER_SIZE) {
+            --count;
+            buf[len++] = (char) (48u + (frac % 10u));
+            if(!(frac /= 10u)){
+              break;
+            }
+          }
+          /* Add extra 0's */
+          while ((len < UART_FLOAT_BUFFER_SIZE) && (count-- > 0u)){
+            buf[len++] = '0';
+          }
+          if(len < UART_FLOAT_BUFFER_SIZE){
+            /* Add decimal */
+            buf[len++] = '.';
+          }
+        }
+
+        /* Do whole part, number is reversed */
+        while(len < UART_FLOAT_BUFFER_SIZE) {
+          buf[len++] = (char) (48 + (whole % 10));
+          if(!(whole /=10)){
+            break;
+          }
+        }
+
+        if(len < UART_FLOAT_BUFFER_SIZE){
+          if(neg){
+            buf[len++] = '-';
+          }
+        }
+
+        /* Print out */
+        writeArray_rev(uart, buf, len);
+
+        pszFmt++;
+        continue;
+      }
+
 
       /* End of string */
       if(pszFmt == '\0'){
@@ -258,6 +384,34 @@ uint32_t printErrorStatus(COMMS_UART_S* uart, const char* name, uint32_t error, 
   }
   return e;
 }
+
+/*******************************************************************************
+* Function Name: writeArray_rev()
+****************************************************************************//**
+*
+* \brief Prints an array in reverse order
+* 
+* \param name [in]
+*    Name of the program to display 
+*
+* \param error [in]
+*    Possible error 
+*
+* \param subError [in]
+*    Sub error code 
+*
+*
+* \return
+* The error code of the operation
+*******************************************************************************/
+uint32_t writeArray_rev(COMMS_UART_S* uart, uint8_t *array, uint16_t len) {
+  uint16_t i; 
+  for(i=len-1; i>0; i--){
+    uart->write(array[i]);
+  }
+  return uart->write(array[0]);
+}
+
 
 
 /* [] END OF FILE */

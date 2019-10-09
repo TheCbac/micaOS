@@ -28,7 +28,8 @@ TIMING_S timing;
 // #define TEST_PRINT_CHAR
 // #define TEST_PRINT_HEX
 // #define TEST_PRINT_API
-#define TEST_UART_ECHO
+#define TEST_PRINT_FLOAT
+// #define TEST_UART_ECHO
 
 
 // #define TEST_PRINT_HEX
@@ -101,6 +102,23 @@ void setup(void){
       printHeader(&uart, "TEST_PRINT_API");
       uart1.uartState = &uart;
       uart1.print
+    #elif defined TEST_PRINT_FLOAT
+      printHeader(&uart, "TEST_PRINT_FLOAT");
+      float val = 10.58;
+      printLn(&uart, "10.58: %f", val);
+      val = NAN;
+      printLn(&uart, "NaN: %f", val);
+      val = 1e10;
+      printLn(&uart, "1E10: %f", val);
+      val = -0.2565;
+      printLn(&uart, "-0.256500: %f", val);
+      printLn(&uart, "-0.26: %.2f", val);
+      printLn(&uart, "-0.256: %.3f", val);
+      val = 1050.025;
+      printLn(&uart, "1050.025: %.3f", val);
+      printLn(&uart, "1050.025000: %f", val);
+
+
 
     #elif defined TEST_UART_ECHO
       printHeader(&uart, "TEST_UART_ECHO");
