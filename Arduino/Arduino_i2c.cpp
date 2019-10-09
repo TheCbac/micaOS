@@ -1,7 +1,7 @@
 /***************************************************************************
 *                                 MICA  © 2019
 *
-* File: i2c_Arduino.c
+* File: Arduino_i2c.c
 * Workspace: micaOS
 * Version: v2.0.0
 * Author: Craig Cheney

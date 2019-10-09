@@ -1,13 +1,10 @@
 /***************************************************************************
-*                                 GardenByte  © 2019
+*                                 MICA  © 2019
 *
 * File: Arduino_i2c.h
-* Workspace: ledDriver_TLC591
-* Project: testScripts
-* Version: v1.0.0
+* Workspace: micaOS
+* Version: v2.0.0
 * Authors: C. Cheney
-* 
-* PCB: Mainboard v1.0.0
 *
 * Brief:
 *   Wrapper class that provides a generic I2C interface for Arduino,

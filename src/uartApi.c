@@ -228,7 +228,7 @@ uint32_t printHeaderDT(COMMS_UART_S* uart, const char* name, const char *date, c
 * The error code of the operation
 *******************************************************************************/
 uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, uint16_t expected){
-  return print(uart, "%s: Received: 0x%x; Expected: 0x%x\r\n", name, actual, expected);
+  return print(uart, "%s: Received: 0x%X; Expected: 0x%X\r\n", name, actual, expected);
 }
 
 /*******************************************************************************
