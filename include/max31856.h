@@ -24,7 +24,7 @@
     * Included files
     ***************************************/
     #include <stdint.h>
-    #include "SPI_psoc.h"
+    #include "micaComms.h"
     /***************************************
     * Macro Definitions
     ***************************************/
