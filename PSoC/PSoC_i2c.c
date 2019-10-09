@@ -36,12 +36,11 @@ uint32_t i2cPsoc_start(COMMS_I2C_S *i2c){
   i2c->writeCmd = i2cPsoc_writeCmd;
   i2c->writeArray = i2cPsoc_writeArray;
   i2c->read = i2cPsoc_read;
-  i2c->readArray = i2cPsoc_readArray2;
+  i2c->readArray = i2cPsoc_readArray;
   /* Start the bus */
   I2C_Start();
   return COMMS_ERROR_NONE;
 }
-
 
 /*******************************************************************************
 * Function Name:  i2cPsoc_Write()
@@ -60,35 +59,25 @@ uint32_t i2cPsoc_start(COMMS_I2C_S *i2c){
 *
 * \return
 * An error code with the result of the Write procedure. 
-* The possible error codes are:
-*
-*  Errors codes                             | Description
-*   ------------                            | -----------
-*   COMMS_ERROR_NONE                 | On successful operation
-*   Error from I2C Component, I2C
-*
 *******************************************************************************/
 uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
-    /* Start, Slave Address & Write bit */
-    uint32_t result = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE );
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* SUB Address */
-    result = I2C_I2CMasterWriteByte(regAddr, I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* DATA */
-    result = I2C_I2CMasterWriteByte(val, I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* STOP Bit */
-    I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
+    /* Send the Register address */
+    uint32_t error = COMMS_ERROR_NONE;
+    uint8_t packet[2] = {regAddr, val};
+    uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, packet, 2, I2C_I2C_MODE_COMPLETE_XFER );
+    /* Ensure Write was successful */
+    if(!opError) {
+        /* Wait for the transfer to complete */
+        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+    } else {
+        /* Report Write error */
+        error = COMMS_ERROR_WRITE;
+    }
+    return error;
 }
 
-
-
 /*******************************************************************************
-* Function Name:  i2cPsoc_WriteCmd()
+* Function Name:  i2cPsoc_writeCmd()
 ****************************************************************************//**
 * \brief
 *  Sends a command to the target device, with no corresponding data
@@ -101,29 +90,21 @@ uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
 *       
 * \return
 * An error code with the result of the Write procedure. 
-* The possible error codes are:
-*
-*  Errors codes                             | Description
-*   ------------                            | -----------
-*   COMMS_ERROR_NONE                 | On successful operation
-*   Error from I2C Component, I2C
-*
 *******************************************************************************/
 uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd){
-    /* Start, Slave Address & Write bit */
-    uint32_t result = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE );
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* Command */
-    result = I2C_I2CMasterWriteByte(cmd, I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* STOP Bit */
-    I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
-    
+    /* Send the Register address */
+    uint32_t error = COMMS_ERROR_NONE;
+    uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &cmd, 1, I2C_I2C_MODE_COMPLETE_XFER );
+    /* Ensure Write was successful */
+    if(!opError) {
+        /* Wait for the transfer to complete */
+        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+    } else {
+        /* Report Write error */
+        error = COMMS_ERROR_WRITE;
+    }
+    return error;
 }
-
 
 /*******************************************************************************
 * Function Name:  i2cPsoc_WriteArray()
@@ -145,38 +126,28 @@ uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd){
 *       
 * \return
 * An error code with the result of the Write procedure. 
-* The possible error codes are:
-*
-*  Errors codes                             | Description
-*   ------------                            | -----------
-*   COMMS_ERROR_NONE                 | On successful operation
-*   Error from I2C Component, I2C
-*
 *******************************************************************************/
 uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len) {
-    /* Start, Slave Address & Write bit */
-    uint32_t result = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE );
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* SUB Address */
-    result = I2C_I2CMasterWriteByte(regAddr, I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* DATA */
-    uint16_t i;
-    for(i = ZERO; i < len; i++) {
-        result = I2C_I2CMasterWriteByte(array[i], I2C_PSOC_TIMEOUT_WRITE);
-        if (result != COMMS_ERROR_NONE) { return result;}
+    /* Send the Register address */
+    uint32_t error = COMMS_ERROR_NONE;
+    uint8_t data[128];
+    data[0] = regAddr;
+    memcpy(&data[1], array, len);
+    uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, data, len+1, I2C_I2C_MODE_COMPLETE_XFER );
+    /* Ensure Write was successful */
+    if(!opError) {
+        /* Wait for the transfer to complete */
+        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+    } else {
+        /* Report Write error */
+        error = COMMS_ERROR_WRITE;
+        array[0] = opError; 
     }
-    /* STOP Bit */
-    I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-    if (result != COMMS_ERROR_NONE) { return result;}
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
+    return error;
 }
 
-
-
 /*******************************************************************************
-* Function Name:  i2cPsoc_Read()
+* Function Name:  i2cPsoc_read()
 ****************************************************************************//**
 * \brief 
 * Read a byte of data from a slave
@@ -193,114 +164,38 @@ uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array,
 *
 * \Return
 *   Error associated with the read value
-*
-*  Errors codes                             | Description
-*   ------------                            | -----------
-*   COMMS_ERROR_NONE                           | On successful operation
-*   Error from I2C Component
-*
 *******************************************************************************/
-uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t * readVal) {
-    /* Start, Slave Address & Write bit */
-    uint32_t opResult = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* SUB Address */
-    opResult = I2C_I2CMasterWriteByte(regAddr, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    /* Restart, Slave address & read bit */
-    opResult = I2C_I2CMasterSendRestart(deviceAddr, I2C_I2C_READ_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* Place to return data */
-    uint8_t rdByte;
-    /* Read the data */
-    opResult = I2C_I2CMasterReadByte(I2C_I2C_NAK_DATA, &rdByte, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    /* Place the opResult into the pointer */
-    *readVal = (uint8_t) rdByte;
-    
-    /* Send the stop bit */
-    opResult = I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
-    
-/* Put the error code in readVal & return failed */
-displayError:
-    /* Place hardware specific value into the readVal */
-    *readVal = opResult;
-    /* return write failed */
-    return COMMS_ERROR_READ;
-}
-
-
-uint32_t i2cPsoc_readArray2(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len){
-    /* Start, Slave Address & Write bit */
-    uint32_t opResult = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* SUB Address */
-    opResult = I2C_I2CMasterWriteByte(regAddr, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    /* Restart, Slave address & read bit */
-//    opResult = I2C_I2CMasterSendRestart(deviceAddr, I2C_I2C_READ_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-//    /* Return error and error code if operation failed */
-//    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* Place to return data */
-    opResult = I2C_I2CMasterReadBuf(deviceAddr, resultArray, len, I2C_I2C_MODE_REPEAT_START  );
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) {
-        goto displayError; 
+uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
+    /* Send the Register address */
+    uint32_t error = COMMS_ERROR_NONE;
+    uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &regAddr, 1,I2C_I2C_MODE_COMPLETE_XFER );
+    /* Ensure Write was successful */
+    if(!opError) {
+        /* Wait for the transfer to complete */
+        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+        /* Initiate the read */
+        opError = I2C_I2CMasterReadBuf(deviceAddr, result, 1, I2C_I2C_MODE_COMPLETE_XFER );
+        /* Ensure write was successful */
+        if(!opError) {
+            /* Wait for transfer to be complete */
+            while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)){}
+        } else {
+            /* Report errors */
+            error = COMMS_ERROR_READ_ARRAY;
+            *result = opError; 
+        }
     } else {
-        /* Wait for transfer to complete */
-        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)){}
-        
-//        if( I2C_I2CMasterGetReadBufSize() != 2) {
-//            goto displayError;
-//        }
+        /* Report Write error */
+        error = COMMS_ERROR_WRITE;
+        *result = opError; 
     }
     
-//    uint8_t rdByte;
-//    uint16_t i;
-//    for(i=ZERO; i<len; i++){
-//        /* Read the data */
-//        opResult = I2C_I2CMasterReadByte(I2C_I2C_ACK_DATA, &rdByte, I2C_PSOC_TIMEOUT_WRITE);
-//        /* Return error and error code if operation failed */
-//        if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-//        /* Place the opResult into the pointer */
-//        resultArray[i] = rdByte;
-//    }
-    
-//    /* Send the stop bit */
-//    opResult = I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-//    /* Return error and error code if operation failed */
-//    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
-    
-/* Put the error code in readVal & return failed */
-displayError:
-    /* Place hardware specific value into the readVal */
-    resultArray[ZERO] = opResult;
-    /* return write failed */
-    return COMMS_ERROR_READ;
+    return error;
 }
 
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_ReadArray()
+* Function Name:  i2cPsoc_readArray()
 ****************************************************************************//**
 * \brief 
 *   Read multiple bytes of data from a slave
@@ -320,55 +215,33 @@ displayError:
 *
 * \Return
 *   Error associated with the read value
-*
-*  Errors codes                             | Description
-*   ------------                            | -----------
-*   COMMS_ERROR_NONE                           | On successful operation
-*   Error from I2C Component
-*
 *******************************************************************************/
 uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len){
-    /* Start, Slave Address & Write bit */
-    uint32_t opResult = I2C_I2CMasterSendStart(deviceAddr, I2C_I2C_WRITE_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* SUB Address */
-    opResult = I2C_I2CMasterWriteByte(regAddr, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    /* Restart, Slave address & read bit */
-    opResult = I2C_I2CMasterSendRestart(deviceAddr, I2C_I2C_READ_XFER_MODE, I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    /* Place to return data */
-    uint8_t rdByte;
-    uint16_t i;
-    for(i=ZERO; i<len; i++){
-        /* Read the data */
-        opResult = I2C_I2CMasterReadByte(I2C_I2C_ACK_DATA, &rdByte, I2C_PSOC_TIMEOUT_WRITE);
-        /* Return error and error code if operation failed */
-        if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-        /* Place the opResult into the pointer */
-        resultArray[i] = rdByte;
+    /* Send the Register address */
+    uint32_t error = COMMS_ERROR_NONE;
+    uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &regAddr, 1,I2C_I2C_MODE_COMPLETE_XFER );
+    /* Ensure Write was successful */
+    if(!opError) {
+        /* Wait for the transfer to complete */
+        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+        /* Initiate the read */
+        opError = I2C_I2CMasterReadBuf(deviceAddr, resultArray, len, I2C_I2C_MODE_COMPLETE_XFER );
+        /* Ensure write was successful */
+        if(!opError) {
+            /* Wait for transfer to be complete */
+            while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)){}
+        } else {
+            /* Report errors */
+            error = COMMS_ERROR_READ_ARRAY;
+            resultArray[0] = opError; 
+        }
+    } else {
+        /* Report Write error */
+        error = COMMS_ERROR_WRITE;
+        resultArray[0] = opError; 
     }
     
-    /* Send the stop bit */
-    opResult = I2C_I2CMasterSendStop(I2C_PSOC_TIMEOUT_WRITE);
-    /* Return error and error code if operation failed */
-    if (opResult != I2C_I2C_MSTR_NO_ERROR ) { goto displayError; } 
-    
-    
-    /* Indicate successs */
-    return COMMS_ERROR_NONE;
-    
-/* Put the error code in readVal & return failed */
-displayError:
-    /* Place hardware specific value into the readVal */
-    resultArray[ZERO] = opResult;
-    /* return write failed */
-    return COMMS_ERROR_READ;
+    return error;
 }
 
 /* [] END OF FILE */

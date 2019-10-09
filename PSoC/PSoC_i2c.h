@@ -47,7 +47,6 @@
     uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len);
     uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result);
     uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len);   /**< Read multiple values from a device */
-    uint32_t i2cPsoc_readArray2(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len);   /**< Read multiple values from a device */
 
 #endif /* PSOC_I2C_H */
 /* [] END OF FILE */

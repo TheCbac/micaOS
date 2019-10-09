@@ -28,12 +28,13 @@ INA226_STATE_S inaState = {0};
 #define TEST
 /***** Test Cases *****/
 // #define TEST_I2C_COMMS
-// #define TEST_INA_START
+#define TEST_INA_ID
+// #define TEST_INA_START_READBACK
 // #define TEST_INA_WRITE
 // #define TEST_PRINT_STRING
 // #define TEST_INA_VBUS       /* Read and display the VBUS value  */
 // #define TEST_INA_CURRENT       /* Read and display the Current value  */
-#define TEST_INA_FULL     /* Display all of the measurements for the device */
+// #define TEST_INA_FULL     /* Display all of the measurements for the device */
 
 
 
@@ -69,8 +70,17 @@ void setup(void){
     comError =Comms_validateI2C(0);
     printErrorStatus(&uart, "Null i2c (Should fail)", comError, 0);
 
-    #elif defined TEST_INA_START /* test the starting the INA226 */
-      printHeader(&uart, "TEST_INA_START");
+    #elif defined TEST_INA_ID /* test the starting the INA226 */
+      printHeader(&uart, "TEST_INA_ID");
+      uint16_t readData = 0;
+      error = INA226_readReg(&inaState, INA226_ADDR_ID_MFG, &readData); 
+      printErrorStatus(&uart, "INA226 ID read", error, inaState.error);
+      uart_compareReg(&uart, "MFG ID", readData, INA_ID_MFG_VAL);
+
+      printLn(&uart, "Finished");
+
+    #elif defined TEST_INA_START_READBACK /* test the starting the INA226 */
+      printHeader(&uart, "TEST_INA_START_READBACK");
       /* Start the device */
       error = INA226_start(&inaState);
       printErrorStatus(&uart, "INA226 Start", error, inaState.error);
