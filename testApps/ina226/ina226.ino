@@ -184,21 +184,10 @@ void loop(void) {
       INA226_readCurrent(&inaState, &current);
       INA226_readPower(&inaState, &power);
 
-      print(&uart, "vBus: ");
-      Serial.print(vBus, 6);
-      Serial.println(" V");
-
-      print(&uart, "vShunt: ");
-      Serial.print(vShunt, 6);
-      Serial.println(" V");
-
-      print(&uart, "Current: ");
-      Serial.print(current, 4);
-      Serial.println(" A");
-
-      print(&uart, "Power: ");
-      Serial.print(power, 4);
-      Serial.println(" W\r\n");
+      printLn(&uart, "\r\nvBus: %.4f V", vBus);
+      printLn(&uart, "vShunt: %.4f V", vShunt);
+      printLn(&uart, "Current: %f A", current);
+      printLn(&uart, "Power: %f W", power);
 
       delay(1000);
     #endif /* TEST_<case> */

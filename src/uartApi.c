@@ -7,7 +7,8 @@
 * Author: Craig Cheney
 *
 * Brief:
-*   Conversions for writing out over the serial port
+*   Conversions for writing out over the serial port. Adapts floating point from 
+*   https://github.com/mpaland/printf/blob/master/printf.c
 *
 * 2019.10.01  - Document Created
 ********************************************************************************/
