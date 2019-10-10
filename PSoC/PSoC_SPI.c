@@ -17,7 +17,7 @@
 *
 * 2019.06.20  - Document Created
 ********************************************************************************/
-#include "PSoC_SPI.h"
+#include "PSoC_spi.h"
 #include "project.h"
 
 
@@ -37,6 +37,7 @@
 *  An error code with the result of the start feature 
 *******************************************************************************/
 uint32_t spiPsoc_start(COMMS_SPI_S *spi){
+    spi->setActive = spiPsoc_setActive;
     spi->write = spiPsoc_write;
     spi->read = spiPsoc_read;   
     spi->writeArray = spiPsoc_writeArray;   
@@ -50,8 +51,33 @@ uint32_t spiPsoc_start(COMMS_SPI_S *spi){
     spiPsoc_clearRxBuffer();
     spiPsoc_clearTxBuffer();
     
-    return SPI_PSOC_ERROR_NONE;
+    return COMMS_ERROR_NONE;
 }
+
+
+/*******************************************************************************
+* Function Name: spiPsoc_setActive()
+****************************************************************************//**
+* \brief
+*  PSoC to generic SPI set active reg wrapper
+*   Writes the pin low of the desired device
+*
+* \param addr [in]
+*   Register Address
+*
+* \param val [in]
+*   Value to write to the register
+*  
+*
+* \return
+*  An error code with the result of the write feature 
+*******************************************************************************/
+uint32_t spiPsoc_setActive(uint8_t id) {
+    uint32_t error = COMMS_ERROR_NONE;
+    spiSlaveSelect_Write(id);
+    return error;
+}
+
 
 /*******************************************************************************
 * Function Name: spiPsoc_write()
@@ -71,7 +97,7 @@ uint32_t spiPsoc_start(COMMS_SPI_S *spi){
 *  An error code with the result of the write feature 
 *******************************************************************************/
 uint32_t spiPsoc_write(uint8_t addr, uint8_t val){
-    uint32_t error = SPI_PSOC_ERROR_NONE;
+    uint32_t error = COMMS_ERROR_NONE;
     /* Ensure RX queue is empty */
     if( SPIM_GetRxBufferSize() == ZERO) {
         SPIM_WriteTxData(addr);
@@ -83,7 +109,7 @@ uint32_t spiPsoc_write(uint8_t addr, uint8_t val){
         /* Throw away dummy bytes */
         SPIM_ClearRxBuffer();
     } else {
-        error = SPI_PSOC_ERROR_PENDING_RX;
+        error = COMMS_ERROR_RXBUFFER;
     }
     /* Return Error  */
     return error;
@@ -108,7 +134,7 @@ uint32_t spiPsoc_write(uint8_t addr, uint8_t val){
 *  An error code with the result of the read feature 
 *******************************************************************************/
 uint32_t spiPsoc_read(uint8_t addr, uint8_t *ret){
-    uint32_t error = SPI_PSOC_ERROR_NONE;
+    uint32_t error = COMMS_ERROR_NONE;
     /* Ensure RX queue is empty */
     if( SPIM_GetRxBufferSize() == ZERO) {
         /* Need to pulse the clock with empty byte */
@@ -122,7 +148,7 @@ uint32_t spiPsoc_read(uint8_t addr, uint8_t *ret){
         SPIM_ReadRxData();
         *ret = SPIM_ReadRxData();  
     } else {
-        error = SPI_PSOC_ERROR_PENDING_RX;
+        error = COMMS_ERROR_RXBUFFER;
     }
     /* Return the error code */
     return error;
@@ -148,7 +174,7 @@ uint32_t spiPsoc_read(uint8_t addr, uint8_t *ret){
 *  An error code with the result of the command
 *******************************************************************************/
 uint32_t spiPsoc_writeArray(uint8_t addr, uint8_t* array, uint16_t len){
-    uint32_t error = SPI_PSOC_ERROR_NONE;
+    uint32_t error = COMMS_ERROR_NONE;
     /* Ensure RX queue is empty */
     if( SPIM_GetRxBufferSize() == ZERO) {
         SPIM_WriteTxData(addr);
@@ -160,7 +186,7 @@ uint32_t spiPsoc_writeArray(uint8_t addr, uint8_t* array, uint16_t len){
         /* Throw away dummy bytes */
         SPIM_ClearRxBuffer();
     } else {
-        error = SPI_PSOC_ERROR_PENDING_RX;
+        error = COMMS_ERROR_RXBUFFER;
     }
     return error;
 }
@@ -185,7 +211,7 @@ uint32_t spiPsoc_writeArray(uint8_t addr, uint8_t* array, uint16_t len){
 *  An error code with the result of the command
 *******************************************************************************/
 uint32_t spiPsoc_readArray(uint8_t addr, uint8_t* array, uint16_t len){
-    uint32_t error = SPI_PSOC_ERROR_NONE;
+    uint32_t error = COMMS_ERROR_NONE;
     /* Ensure RX queue is empty */
     if( SPIM_GetRxBufferSize() == ZERO) {
         /* Write out the address byte */
@@ -206,7 +232,7 @@ uint32_t spiPsoc_readArray(uint8_t addr, uint8_t* array, uint16_t len){
             array[i] = SPIM_ReadRxData(); 
         }
     } else {
-        error = SPI_PSOC_ERROR_PENDING_RX;
+        error = COMMS_ERROR_RXBUFFER;
     }
     return error;
 }
@@ -226,7 +252,7 @@ uint32_t spiPsoc_readArray(uint8_t addr, uint8_t* array, uint16_t len){
 *******************************************************************************/
 uint32_t spiPsoc_getRxBufferSize(uint8_t *result){
     *result = SPIM_GetRxBufferSize();
-    return SPI_PSOC_ERROR_NONE;  
+    return COMMS_ERROR_NONE;  
 }
 
 /*******************************************************************************
@@ -244,7 +270,7 @@ uint32_t spiPsoc_getRxBufferSize(uint8_t *result){
 *******************************************************************************/
 uint32_t spiPsoc_getTxBufferSize(uint8_t *result){
     *result = SPIM_GetTxBufferSize();   
-    return SPI_PSOC_ERROR_NONE;  
+    return COMMS_ERROR_NONE;  
 }
 
 /*******************************************************************************
@@ -259,7 +285,7 @@ uint32_t spiPsoc_getTxBufferSize(uint8_t *result){
 *******************************************************************************/
 uint32_t spiPsoc_clearRxBuffer(void){
     SPIM_ClearRxBuffer();   
-    return SPI_PSOC_ERROR_NONE;  
+    return COMMS_ERROR_NONE;  
 }
 
 /*******************************************************************************
@@ -274,7 +300,7 @@ uint32_t spiPsoc_clearRxBuffer(void){
 *******************************************************************************/
 uint32_t spiPsoc_clearTxBuffer(void){
     SPIM_ClearTxBuffer();   
-    return SPI_PSOC_ERROR_NONE;  
+    return COMMS_ERROR_NONE;  
 }
 
 

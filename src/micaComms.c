@@ -81,6 +81,8 @@ uint32_t Comms_validateI2C(COMMS_I2C_S *i2c){
 *******************************************************************************/
 uint32_t Comms_validateSpi(COMMS_SPI_S *spi) {
     uint32_t error = COMMS_ERROR_NONE;
+    error |= (spi == NULL)              ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
+    error |= (spi->setActive == NULL)   ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
     error |= (spi->write == NULL)       ? COMMS_ERROR_WRITE : COMMS_ERROR_NONE;
     error |= (spi->writeArray == NULL)  ? COMMS_ERROR_WRITE_ARRAY : COMMS_ERROR_NONE;
     error |= (spi->read == NULL)        ? COMMS_ERROR_READ : COMMS_ERROR_NONE;

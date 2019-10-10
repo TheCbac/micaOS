@@ -17,7 +17,7 @@
 *
 * 2019.10.03  - Document Created
 ********************************************************************************/
-#include "ina226.h"
+#include "INA226.h"
 #include "micaCommon.h"
 
 /*******************************************************************************
@@ -164,11 +164,11 @@ uint32_t INA226_start(INA226_STATE_S* state) {
   /* Calibartion register */
   if(!error){
     /* Calculate the Current LSB */
-    state->currentLsb = state->maxCurrent / INA_CURRENT_LSB_SCALE;
+    state->_currentLsb = state->maxCurrent / INA_CURRENT_LSB_SCALE;
     /* Calculate the calibration constant */
-    state->calibration = INA_CAL_SCALE / (state->currentLsb * state->rShunt);
+    state->_calibration = INA_CAL_SCALE / (state->_currentLsb * state->rShunt);
     /* Write out the calibration register */
-    error |= INA226_writeReg(state, INA226_ADDR_CALIBRATION, (uint16_t) state->calibration );
+    error |= INA226_writeReg(state, INA226_ADDR_CALIBRATION, (uint16_t) state->_calibration );
 
   }
   return error;
@@ -259,7 +259,7 @@ uint32_t INA226_readCurrent(INA226_STATE_S* state, float* val){
   uint32_t error = INA226_readReg(state, INA226_ADDR_CURRENT, &regVal);
   /* Convert to Amps */
   if(!error){
-    *val = regVal * state->currentLsb;
+    *val = regVal * state->_currentLsb;
   }
   return error;
 }
@@ -284,7 +284,7 @@ uint32_t INA226_readPower(INA226_STATE_S* state, float* val){
   uint32_t error = INA226_readReg(state, INA226_ADDR_POWER, &regVal);
   /* Convert to Amps */
   if(!error){
-    *val = regVal * state->currentLsb * INA_POWER_SCALE;
+    *val = regVal * state->_currentLsb * INA_POWER_SCALE;
   }
   return error;
 }

@@ -31,12 +31,14 @@
   #define COMMS_ERROR_SHIFT_READ              (3) /**< Shift of a null read function */
   #define COMMS_ERROR_SHIFT_READ_ARRAY        (4) /**< Shift of a null read array function */
   #define COMMS_ERROR_SHIFT_I2C               (5) /**< Shift of the state not present error */
-  #define COMMS_ERROR_SHIFT_START             (6) /**< Shift of an incorrect start procedure */
-  #define COMMS_ERROR_SHIFT_RANGE             (7) /**< Shift of out of range error */
-  #define COMMS_ERROR_SHIFT_VAL               (8) /**< Shift of out of incorrect value*/
-  #define COMMS_ERROR_SHIFT_ADDR              (9) /**< Shift of an invalid address */
-  #define COMMS_ERROR_SHIFT_RXBUFFER          (10) /**< Shift of an missing RX buffer */
-  #define COMMS_ERROR_SHIFT_TXBUFFER          (11) /**< Shift of an missing TX buffer */
+  #define COMMS_ERROR_SHIFT_SPI               (6) /**< Shift of the state not present error */
+  #define COMMS_ERROR_SHIFT_UART              (7) /**< Shift of the state not present error */
+  #define COMMS_ERROR_SHIFT_START             (8) /**< Shift of an incorrect start procedure */
+  #define COMMS_ERROR_SHIFT_RANGE             (9) /**< Shift of out of range error */
+  #define COMMS_ERROR_SHIFT_VAL               (10) /**< Shift of out of incorrect value*/
+  #define COMMS_ERROR_SHIFT_ADDR              (11) /**< Shift of an invalid address */
+  #define COMMS_ERROR_SHIFT_RXBUFFER          (12) /**< Shift of an missing RX buffer */
+  #define COMMS_ERROR_SHIFT_TXBUFFER          (13) /**< Shift of an missing TX buffer */
 
 
   #define COMMS_ERROR_NONE                    (0) /**< No error occurred */
@@ -46,6 +48,8 @@
   #define COMMS_ERROR_READ                    (1u << COMMS_ERROR_SHIFT_READ)        /**< Flag of a null read function */
   #define COMMS_ERROR_READ_ARRAY              (1u << COMMS_ERROR_SHIFT_READ_ARRAY)  /**< Flag of a null read array function */
   #define COMMS_ERROR_I2C                     (1u << COMMS_ERROR_SHIFT_I2C)       /**< Flag of the state not present error */
+  #define COMMS_ERROR_SPI                     (1u << COMMS_ERROR_SHIFT_SPI)       /**< Flag of the state not present error */
+  #define COMMS_ERROR_UART                    (1u << COMMS_ERROR_SHIFT_UART)       /**< Flag of the state not present error */
   #define COMMS_ERROR_START                   (1u << COMMS_ERROR_SHIFT_START)       /**< Flag of an incorrect start procedure */
   #define COMMS_ERROR_RANGE                   (1u << COMMS_ERROR_SHIFT_RANGE)       /**< Flag of out of range error */
   #define COMMS_ERROR_VAL                     (1u << COMMS_ERROR_SHIFT_VAL)         /**< Flag of out of  incorrect value*/
@@ -85,6 +89,7 @@
 
   /* SPI */
   typedef struct {
+    uint32_t (*setActive) (uint8_t id);
     uint32_t (*write) (uint8_t addr, uint8_t val);
     uint32_t (*read) (uint8_t addr, uint8_t *ret);
     uint32_t (*writeArray)(uint8_t addr, uint8_t* array, uint16_t len);

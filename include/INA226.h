@@ -167,8 +167,8 @@
     uint8_t deviceAddr;     /**< Address of the device to communicate with */
     float maxCurrent;       /**< Maximum expected current in units of Amperes */
     float rShunt;           /**< Value of the shunt resistor in units of Ohms */
-    float currentLsb;       /**< Internal use only, do not set directly */
-    float calibration;      /**< Internal use only, do not set directly */
+    float _currentLsb;       /**< Internal use only, do not set directly */
+    float _calibration;      /**< Internal use only, do not set directly */
   } INA226_STATE_S; 
   
   /***************************************

@@ -28,12 +28,7 @@
     /***************************************
     * Macro Definitions
     ***************************************/
-    #define MAX31856_ERROR_NONE     (0)
-    
-    #define MAX31856_SHIFT_SPI      (0)
-    
-    #define MAX31856_ERROR_SPI      (1u << MAX31856_SHIFT_SPI) /* An SPI error occurred. See error in struct */
-    
+
     /* Temperature Conversions  */
     #define MAX31856_TEMP_SHIFT_LSB         (5)     /**< Position of the least significant bit (32-bit format) */
     #define MAX31856_TEMP_SHIFT_MSB         (22)    /**< Position of the most significant bit (32-bit format) */
@@ -45,17 +40,17 @@
     #define MAX31856_TEMP_NEG               (2048.0)  /**< Offset for the sign bit */
 
     #define MAX31856_TEMP_TEST1_BIN         (0b011001000000000000000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST1_F           (1600.0) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST1_F           (1600.0) /**< Temperature test value in °C */
     #define MAX31856_TEMP_TEST2_BIN         (0b000001100100111100000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST2_F           (100.9375) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST2_F           (100.9375) /**< Temperature test value in °C */
     #define MAX31856_TEMP_TEST3_BIN         (0b000000000000000100000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST3_F           (0.0625) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST3_F           (0.0625) /**< Temperature test value in °C */
     #define MAX31856_TEMP_TEST4_BIN         (0b111111111111111100000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST4_F           (-0.0625) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST4_F           (-0.0625) /**< Temperature test value in °C */
     #define MAX31856_TEMP_TEST5_BIN         (0b111111111111000000000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST5_F           (-1.00) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST5_F           (-1.00) /**< Temperature test value in °C */
     #define MAX31856_TEMP_TEST6_BIN         (0b111100000110000000000000) /**< Temperature test value in Binary */
-    #define MAX31856_TEMP_TEST6_F           (-250.00) /**< Temperature test value in Binary in °C */
+    #define MAX31856_TEMP_TEST6_F           (-250.00) /**< Temperature test value in °C */
 
 
     /* SPI */
@@ -129,7 +124,8 @@
     ***************************************/
     typedef struct {
         uint32_t error;     /**< Passing error codes out */
-        COMMS_SPI_S spi;    /**< SPI comms struct */
+        uint8_t slaveId;    /**< ID of the slave */    
+        COMMS_SPI_S* spi;    /**< SPI comms struct */
         float temp;         /**< latest temperature reading */
     } MAX31856_STATE_S;
     
@@ -142,7 +138,6 @@
     uint32_t MAX31856_writeArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *array, uint8_t len);
 
     uint32_t MAX31856_Start(MAX31856_STATE_S* state);
-//    uint32_t MAX31856_ReadTemp(MAX31856_STATE_S* state, float *temp);
     uint32_t MAX31856_ReadTemp(MAX31856_STATE_S* state);
     
     float MAX31856_ConvertTemp(uint32_t temp);

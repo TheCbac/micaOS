@@ -42,12 +42,14 @@
 *******************************************************************************/
 uint32_t MAX31856_readReg(MAX31856_STATE_S* state, uint8_t addr, uint8_t *val){
     /* Ensure state exists */
-    uint32_t error = Comms_validateSpi(&(state->spi));
+    uint32_t error = Comms_validateSpi(state->spi);
     if(!error) {
+        /* Set slave active */
+        error|= state->spi->setActive(state->slaveId);
         /* Places results into val */
-        uint32_t spiError = state->spi.read(addr, val);
+        uint32_t spiError = state->spi->read(addr, val);
         /* Place output error in the state struct */
-        error |= spiError ? MAX31856_ERROR_SPI : MAX31856_ERROR_NONE;
+        error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
     }
     return error;
@@ -74,12 +76,14 @@ uint32_t MAX31856_readReg(MAX31856_STATE_S* state, uint8_t addr, uint8_t *val){
 *******************************************************************************/
 uint32_t MAX31856_writeReg(MAX31856_STATE_S* state, uint8_t addr, uint8_t val){
     /* Ensure state exists */
-    uint32_t error = Comms_validateSpi(&(state->spi));
+    uint32_t error = Comms_validateSpi(state->spi);
     if(!error) {
+        /* Set slave active */
+        error|= state->spi->setActive(state->slaveId);
         /* Places results into val */
-        uint32_t spiError = state->spi.write( (addr | MAX318526_MASK_WRITEADDR), val);
+        uint32_t spiError = state->spi->write( (addr | MAX318526_MASK_WRITEADDR), val);
         /* Place output error in the state struct */
-        error |= spiError ? MAX31856_ERROR_SPI : MAX31856_ERROR_NONE;
+        error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
     }
     return error;
@@ -106,12 +110,14 @@ uint32_t MAX31856_writeReg(MAX31856_STATE_S* state, uint8_t addr, uint8_t val){
 *******************************************************************************/
 uint32_t MAX31856_readArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *array, uint8_t len){
     /* Ensure state exists */
-    uint32_t error = Comms_validateSpi(&(state->spi));
+    uint32_t error = Comms_validateSpi(state->spi);
     if(!error) {
+        /* Set slave active */
+        error|= state->spi->setActive(state->slaveId);
         /* Places results into Array */
-        uint32_t spiError = state->spi.readArray(addr, array, len);
+        uint32_t spiError = state->spi->readArray(addr, array, len);
         /* Place output error in the state struct */
-        error |= spiError ? MAX31856_ERROR_SPI : MAX31856_ERROR_NONE;
+        error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
     }
     return error;
@@ -137,12 +143,14 @@ uint32_t MAX31856_readArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *arra
 *******************************************************************************/
 uint32_t MAX31856_writeArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *array, uint8_t len){
     /* Ensure state exists */
-    uint32_t error = Comms_validateSpi(&(state->spi));
+    uint32_t error = Comms_validateSpi(state->spi);
     if(!error) {
+        /* Set slave active */
+        error|= state->spi->setActive(state->slaveId);
         /* Places results into Array */
-        uint32_t spiError = state->spi.writeArray((addr | MAX318526_MASK_WRITEADDR), array, len);
+        uint32_t spiError = state->spi->writeArray((addr | MAX318526_MASK_WRITEADDR), array, len);
         /* Place output error in the state struct */
-        error |= spiError ? MAX31856_ERROR_SPI : MAX31856_ERROR_NONE;
+        error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
     }
     return error;
@@ -170,6 +178,14 @@ uint32_t MAX31856_Start(MAX31856_STATE_S* state){
     uint32_t error = MAX31856_writeReg(state, MAX31856_CR0_ADDR, MAX31856_CR0_MASK_CMODE);
     uint8_t CR1_val = (MAX31856_CR1_MASK_TC_K | MAX31856_CR1_MASK_AVG4);
     error |= MAX31856_writeReg(state, MAX31856_CR1_ADDR, CR1_val);
+    if(!error) {
+        uint8_t readVal;
+        error |= MAX31856_readReg(state, MAX31856_CR1_ADDR, &readVal);
+        if(error || (readVal != CR1_val)) {
+            error = COMMS_ERROR_START;
+           state->error = readVal;    
+        } 
+    }
     return error;
 }
 
