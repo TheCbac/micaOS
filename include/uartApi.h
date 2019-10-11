@@ -24,7 +24,9 @@
   * Macro Definitions
   ***************************************/
   #define CLEAR_SCREEN_CMD    "\033[2J\033[1;1H"
-
+  #define CLEAR_LINE_CMD      "\033[K\r"
+  #define CMD_LINE_UP         "\033[1A"
+  #define CMD_CLEAR_LINEUP    "\r\033[1A\033[K"
   /***************************************
   * Enumerated Types
   ***************************************/
