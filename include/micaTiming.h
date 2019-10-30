@@ -39,6 +39,7 @@
   ***************************************/
   typedef struct {
       uint32_t (*delayMs) (uint32_t time);
+      void (*reset)(void);
   } TIMING_S;
   
   /***************************************

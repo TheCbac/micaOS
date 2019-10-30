@@ -60,6 +60,8 @@
   #define HEX_VAL_MAX                         (16)  /* Maximum value of a hex digit */
   
   #define COMMS_DEFAULT_BAUD                  (115200)
+  #define BYTES_PER_FLOAT                     (4) /* Number of bytes in a float */
+  #define COMMS_I2C_MASK_READ                 (0x01)
   /***************************************
   * Structs
   ***************************************/ 
@@ -77,7 +79,6 @@
   } COMMS_UART_S;
 
 
-    
   /* I2C */
   typedef struct {
     uint32_t (*write)(uint8_t deviceAddr, uint8_t regAddr, uint8_t val);                        /**< Write to an I2C register */
@@ -100,12 +101,20 @@
     uint32_t (*clearTxBuffer)(void);
   } COMMS_SPI_S;
 
+  /* Float to Byte array */
+  typedef union {
+    float num;
+    uint8_t bytes[BYTES_PER_FLOAT];
+  } floatByte_U; 
   /***************************************
   * Function Prototypes
   ***************************************/ 
   uint32_t Comms_validateUart(COMMS_UART_S *uart);
   uint32_t Comms_validateI2C(COMMS_I2C_S *i2c);
   uint32_t Comms_validateSpi(COMMS_SPI_S *spi);
+
+  void float2Byte(float fIn, uint8_t* array);
+  void byte2Float(uint8_t* array, float* fOut);
 
 #endif /* MICA_COMMS_H */
 

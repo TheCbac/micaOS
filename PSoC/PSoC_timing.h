@@ -37,6 +37,7 @@
   ***************************************/
   uint32_t timingPsoc_start(TIMING_S* state);
   uint32_t timingPsoc_delayMs(uint32_t millis);
+  void timingPsoc_reset(void);
  
 #endif /* PSOC_TIMING_H */
 /* [] END OF FILE */

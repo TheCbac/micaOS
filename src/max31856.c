@@ -165,12 +165,6 @@ uint32_t MAX31856_writeArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *arr
 * \param state [in/out]
 *   Pointer to the state struct
 *
-* \param addr [in]
-*   Start Address of the registers
-*
-* \param val [out]
-*   Values to write
-*
 * \return
 *   Error code of the operation
 *******************************************************************************/

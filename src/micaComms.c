@@ -94,5 +94,49 @@ uint32_t Comms_validateSpi(COMMS_SPI_S *spi) {
     return error;
 }
 
+/*******************************************************************************
+* Function Name: float2Byte()
+****************************************************************************//**
+* \brief
+*  Converts a float to a byte array
+*
+* \param fIn [In]
+*  Input float
+*
+* \param array [out]
+* Output array. Must be at lease 4 bytes long
+*
+* \return
+*  none
+*******************************************************************************/
+void float2Byte(float fIn, uint8_t* array) {
+  floatByte_U data;
+  data.num = fIn;
+  uint8_t i;
+  for(i=0; i<BYTES_PER_FLOAT; i++) {
+    array[i] = data.bytes[i];
+  }
+}
+
+/*******************************************************************************
+* Function Name: Comms_validateSpi()
+****************************************************************************//**
+* \brief
+*  Validate the UART communication structure provided
+*
+* \param i2c
+*  Pointer to the UART Struct
+*
+* \return
+*  An error code with the result
+*******************************************************************************/
+void byte2Float(uint8_t* array, float* fOut) {
+  floatByte_U data;
+  uint8_t i;
+  for(i=0; i<BYTES_PER_FLOAT; i++){
+    data.bytes[i] = array[i];
+  }
+  *fOut = data.num;
+}
 
 /* [] END OF FILE */

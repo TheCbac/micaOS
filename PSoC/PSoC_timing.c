@@ -28,6 +28,7 @@
 uint32_t timingPsoc_start(TIMING_S* state) {
   /* Register the Psoc commands and start */
   state->delayMs = timingPsoc_delayMs;
+  state->reset = timingPsoc_reset;
   return TIMING_ERROR_NONE;
 }
 
@@ -45,6 +46,18 @@ uint32_t timingPsoc_start(TIMING_S* state) {
 uint32_t timingPsoc_delayMs(uint32_t millis) {
   CyDelay(millis);
   return TIMING_ERROR_NONE;
+}
+
+/*******************************************************************************
+* Function Name: timingPsoc_reset()
+****************************************************************************//**
+* \brief Immeditately resets the device
+*
+* \return
+*  None
+*******************************************************************************/
+void timingPsoc_reset(void){
+  CySoftwareReset();
 }
 
 /* [] END OF FILE */

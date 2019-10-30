@@ -93,6 +93,7 @@
     #define MICA_DELAY_US_SEC_HALF      (500000)        /**< Delay in us for 0.5 second  */
     #define MICA_DELAY_US_SEC_ONE       (1000000)       /**< Delay in us for 1.0 second  */
     
+    
 
     // #define MICA_delayMs(val)     CyDelay(val)    /**< Delay function */
     // #define MICA_softwareReset()    CySoftwareReset() /**< Software reset function */

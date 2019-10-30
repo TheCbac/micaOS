@@ -259,7 +259,7 @@ uint32_t INA226_readCurrent(INA226_STATE_S* state, float* val){
   uint32_t error = INA226_readReg(state, INA226_ADDR_CURRENT, &regVal);
   /* Convert to Amps */
   if(!error){
-    *val = regVal * state->_currentLsb;
+    *val = ((float) regVal) * state->_currentLsb;
   }
   return error;
 }
