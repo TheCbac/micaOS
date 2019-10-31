@@ -138,7 +138,7 @@
   /* VSHUNT */
   #define INA_VSHUNT_LSB              (0.0000025f) /* Value in Volts of a LSB */   
   #define INA_VSHUNT_MASK             (0x7FFF) /* Full range of the VBUS register */
-  #define INA_SIGN_BIT                (1u << 15)  /* Twos complement sign bit */
+  #define INA_BIT_WIDTH               (16) /* Number of bits per register */
   #define INA_CURRENT_LSB_SCALE       (32768.0) /* Scaling factor for the device */
   #define INA_CAL_SCALE               (0.00512) /* Scaling factor for the calibration reg */
   #define INA_POWER_SCALE             (25.0) /* Fixed scale for Power conversion */

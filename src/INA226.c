@@ -149,7 +149,7 @@ uint32_t INA226_start(INA226_STATE_S* state) {
   if(!error) {
     uint16_t config = 0;
     /* AVG - 16 averages, continuous monitoring */
-    config |= INA_CONFIG_AVG_16;
+    config |= INA_CONFIG_AVG_1;
     /* VBUSTCT - 1.1 ms */
     config |= INA_CONFIG_VBUSCT_1100;
     /* VSHCT - 1.1 ms */
@@ -217,23 +217,12 @@ uint32_t INA226_readVoltage_Bus(INA226_STATE_S* state, float* val){
 *******************************************************************************/
 uint32_t INA226_readVoltage_Shunt(INA226_STATE_S* state, float* val){
   uint16_t regVal = 0;
-  float vShunt = 0;
-  float sign = 1;
   uint32_t error = INA226_readReg(state, INA226_ADDR_SHUNT, &regVal);
   /* Convert to Volts */
   if(!error){
-    /* Check if negative */
-    if(regVal & INA_SIGN_BIT){
-      sign = -1;
-      /* Mask off the sign bit */
-      regVal &= (~INA_SIGN_BIT);
-      /* Convert from Two's complement to Binary */
-      regVal -= 1;
-      regVal = ~regVal;
-    }
-    /* Convert to Volts */
-    vShunt = INA_VSHUNT_LSB * regVal;
-    *val = sign * vShunt;
+    /* Convert from twos complement to signed */
+    int16_t sInt = twosComp2Signed(regVal, INA_BIT_WIDTH);
+    *val = INA_VSHUNT_LSB * sInt;
   }
   return error;
 }
@@ -259,7 +248,9 @@ uint32_t INA226_readCurrent(INA226_STATE_S* state, float* val){
   uint32_t error = INA226_readReg(state, INA226_ADDR_CURRENT, &regVal);
   /* Convert to Amps */
   if(!error){
-    *val = ((float) regVal) * state->_currentLsb;
+    /* Convert from two's comp */
+    int16_t sInt = twosComp2Signed(regVal, INA_BIT_WIDTH);
+    *val = state->_currentLsb * sInt;
   }
   return error;
 }

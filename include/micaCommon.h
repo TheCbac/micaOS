@@ -97,6 +97,7 @@
 
     // #define MICA_delayMs(val)     CyDelay(val)    /**< Delay function */
     // #define MICA_softwareReset()    CySoftwareReset() /**< Software reset function */
+    #define twosComp2Signed(tComp, bits) (tComp & (bits-1)) ? tComp | ~((1<<bits)-1) : tComp
     
     /***************************************
     * Structs
