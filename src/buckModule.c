@@ -267,16 +267,13 @@ uint32_t buck_getDuty(BUCK_STATE_S* state) {
 
 
 /*******************************************************************************
-* Function Name: buck_setDuty()
+* Function Name: buck_getCurrent()
 ****************************************************************************//**
 * \brief
-*   Sets the device open loop duty cycle
+*   Get the current measured by the device
 *
 * \param state [in/out]
 *   Pointer to the state struct
-*
-* \param mode [in]
-*   Next mode to go into
 * 
 * \return
 *   Error code of the operation
@@ -287,6 +284,28 @@ uint32_t buck_getCurrent(BUCK_STATE_S* state) {
   error |= buck_readArray(state, BUCK_ADDR_MEASI, fBytes, BYTES_PER_FLOAT);
   if(!error) {
     byte2Float(fBytes, &state->measI);
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getVoltage()
+****************************************************************************//**
+* \brief
+*   Get the current measured by the device
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getVoltage(BUCK_STATE_S* state){
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_MEASV, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->measV);
   }
   return error;
 }

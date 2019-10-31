@@ -84,12 +84,14 @@
   uint32_t buck_readReg(BUCK_STATE_S* state, uint8_t addr, uint8_t *val);
   uint32_t buck_writeArray(BUCK_STATE_S* state, uint8_t addr, uint8_t *val, uint8_t len);
   uint32_t buck_readArray(BUCK_STATE_S* state, uint8_t addr, uint8_t *val, uint8_t len);
+
   uint32_t buck_start(BUCK_STATE_S* state);
   uint32_t buck_setMode(BUCK_STATE_S* state, BUCK_MODE_T mode);
   uint32_t buck_setDuty(BUCK_STATE_S* state, uint8_t duty);
   uint32_t buck_getDuty(BUCK_STATE_S* state);
-
   uint32_t buck_getCurrent(BUCK_STATE_S* state);
+  uint32_t buck_getVoltage(BUCK_STATE_S* state);
+
 
   #define buck_disable(state) buck_setMode(state, BUCK_MODE_OFF)
 
