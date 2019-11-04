@@ -399,7 +399,7 @@ uint32_t buck_getDuty(BUCK_STATE_S* state) {
 uint32_t buck_getRefV(BUCK_STATE_S* state) {
   uint32_t error = COMMS_ERROR_NONE;
   uint8_t fBytes[BYTES_PER_FLOAT];
-  error |= buck_readArray(state, BUCK_ADDR_DUTY, fBytes, BYTES_PER_FLOAT);
+  error |= buck_readArray(state, BUCK_ADDR_VREF, fBytes, BYTES_PER_FLOAT);
   if(!error) {
     byte2Float(fBytes, &state->refV);
   }
@@ -424,7 +424,7 @@ uint32_t buck_getRefV(BUCK_STATE_S* state) {
 uint32_t buck_getRefI(BUCK_STATE_S* state) {
   uint32_t error = COMMS_ERROR_NONE;
   uint8_t fBytes[BYTES_PER_FLOAT];
-  error |= buck_readArray(state, BUCK_ADDR_DUTY, fBytes, BYTES_PER_FLOAT);
+  error |= buck_readArray(state, BUCK_ADDR_IREF, fBytes, BYTES_PER_FLOAT);
   if(!error) {
     byte2Float(fBytes, &state->refI);
   }

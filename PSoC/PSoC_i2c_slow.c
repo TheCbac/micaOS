@@ -1,24 +1,26 @@
 /***************************************************************************
 *                                 MICA  © 2019
 *
-* File: PSoC_i2c.c
+* File: PSoC_i2c_slow.c
 * Workspace: micaOS
 * Version: v2.0.0
 * Author: Craig Cheney
 * 
 *
 * Brief:
-*   Wrapper class that provides a generic I2C interface for Psoc,
-*   using the Wire library.
+*   Wrapper class that provides a generic I2C interface for Psoc. This Version
+*   is meant to communicate with a PSoC Slave device. Requires a hack to Delay
+*   the read commands
+*   
 *
-* 2019.10.08  - Document Created
+* 2019.11.04  - Document Created
 ********************************************************************************/
-#include "PSoC_i2c.h"
+#include "PSoC_i2c_slow.h"
 #include "project.h"
 #include "I2C_I2C.h"
 
 /*******************************************************************************
-* Function Name: i2cPsoc_start()
+* Function Name: i2cPsocSlow_start()
 ****************************************************************************//**
 * \brief
 *  Wire to generic I2C Start Wrapper
@@ -30,20 +32,20 @@
 * \return
 * An error code with the result of the start procedure 
 *******************************************************************************/
-uint32_t i2cPsoc_start(COMMS_I2C_S *i2c){
+uint32_t i2cPsocSlow_start(COMMS_I2C_S *i2c){
   /* Register the Psoc commands with the COMMS struct */
-  i2c->write = i2cPsoc_write;
-  i2c->writeCmd = i2cPsoc_writeCmd;
-  i2c->writeArray = i2cPsoc_writeArray;
-  i2c->read = i2cPsoc_read;
-  i2c->readArray = i2cPsoc_readArray;
+  i2c->write = i2cPsocSlow_write;
+  i2c->writeCmd = i2cPsocSlow_writeCmd;
+  i2c->writeArray = i2cPsocSlow_writeArray;
+  i2c->read = i2cPsocSlow_read;
+  i2c->readArray = i2cPsocSlow_readArray;
   /* Start the bus */
   I2C_Start();
   return COMMS_ERROR_NONE;
 }
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_Write()
+* Function Name:  i2cPsocSlow_Write()
 ****************************************************************************//**
 * \brief
 *  Writes a byte to data to a given register of the target I2C slave 
@@ -60,7 +62,7 @@ uint32_t i2cPsoc_start(COMMS_I2C_S *i2c){
 * \return
 * An error code with the result of the Write procedure. 
 *******************************************************************************/
-uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
+uint32_t i2cPsocSlow_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
     /* Send the Register address */
     uint32_t error = COMMS_ERROR_NONE;
     uint8_t packet[2] = {regAddr, val};
@@ -77,7 +79,7 @@ uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
 }
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_writeCmd()
+* Function Name:  i2cPsocSlow_writeCmd()
 ****************************************************************************//**
 * \brief
 *  Sends a command to the target device, with no corresponding data
@@ -91,7 +93,7 @@ uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val) {
 * \return
 * An error code with the result of the Write procedure. 
 *******************************************************************************/
-uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd){
+uint32_t i2cPsocSlow_writeCmd(uint8_t deviceAddr, uint8_t cmd){
     /* Send the Register address */
     uint32_t error = COMMS_ERROR_NONE;
     uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &cmd, 1, I2C_I2C_MODE_COMPLETE_XFER );
@@ -107,7 +109,7 @@ uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd){
 }
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_WriteArray()
+* Function Name:  i2cPsocSlow_WriteArray()
 ****************************************************************************//**
 * \brief
 *  Writes multiple bytes of data out the a specified device
@@ -127,7 +129,7 @@ uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd){
 * \return
 * An error code with the result of the Write procedure. 
 *******************************************************************************/
-uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len) {
+uint32_t i2cPsocSlow_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len) {
     /* Send the Register address */
     uint32_t error = COMMS_ERROR_NONE;
     uint8_t data[128];
@@ -147,7 +149,7 @@ uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array,
 }
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_read()
+* Function Name:  i2cPsocSlow_read()
 ****************************************************************************//**
 * \brief 
 * Read a byte of data from a slave
@@ -165,7 +167,7 @@ uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array,
 * \Return
 *   Error associated with the read value
 *******************************************************************************/
-uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
+uint32_t i2cPsocSlow_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
     /* Send the Register address */
     uint32_t error = COMMS_ERROR_NONE;
     uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &regAddr, 1,I2C_I2C_MODE_COMPLETE_XFER );
@@ -173,7 +175,9 @@ uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
     if(!opError) {
         /* Wait for the transfer to complete */
         while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
-    
+        /* This is a hack - when implementing an I2C slave on a PSoC, it needs time to service
+        the write command and load the data into the read buffer */
+        CyDelayUs(2000);
         /* Initiate the read */
         opError = I2C_I2CMasterReadBuf(deviceAddr, result, 1, I2C_I2C_MODE_COMPLETE_XFER );
         /* Ensure write was successful */
@@ -196,7 +200,7 @@ uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
 
 
 /*******************************************************************************
-* Function Name:  i2cPsoc_readArray()
+* Function Name:  i2cPsocSlow_readArray()
 ****************************************************************************//**
 * \brief 
 *   Read multiple bytes of data from a slave
@@ -217,7 +221,7 @@ uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
 * \Return
 *   Error associated with the read value
 *******************************************************************************/
-uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len){
+uint32_t i2cPsocSlow_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len){
     /* Send the Register address */
     uint32_t error = COMMS_ERROR_NONE;
     uint32_t opError = I2C_I2CMasterWriteBuf(deviceAddr, &regAddr, 1,I2C_I2C_MODE_COMPLETE_XFER );
@@ -225,7 +229,9 @@ uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultA
     if(!opError) {
         /* Wait for the transfer to complete */
         while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
-    
+        /* This is a hack - when implementing an I2C slave on a PSoC, it needs time to service
+        the write command and load the data into the read buffer */
+        CyDelayUs(2000);
         /* Initiate the read */
         opError = I2C_I2CMasterReadBuf(deviceAddr, resultArray, len, I2C_I2C_MODE_COMPLETE_XFER );
         /* Ensure write was successful */

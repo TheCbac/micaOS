@@ -45,6 +45,7 @@
   uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii);
   uint32_t uart_compareReg(COMMS_UART_S* uart, const char* name, uint16_t actual, uint16_t expected);
   uint32_t writeArray_rev(COMMS_UART_S* uart, uint8_t *array, uint16_t len);
+  uint32_t parseAsciiFloat(uint8_t* buf, uint16_t len, float* result);
 
 
 

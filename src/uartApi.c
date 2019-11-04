@@ -413,6 +413,98 @@ uint32_t writeArray_rev(COMMS_UART_S* uart, uint8_t *array, uint16_t len) {
   return uart->write(array[0]);
 }
 
+/*******************************************************************************
+* Function Name: parseAsciiFloat()
+****************************************************************************//**
+* \brief Parses and ascii array and places the result into the result float
+* 
+* \param buf [in]
+*    Buffer containing the input buffer 
+*
+* \param len [in]
+*    Possible error 
+*
+* \param result [out]
+*    Pointer to the float to place the result
+*
+* \return
+* The error code of the operation
+*******************************************************************************/
+uint32_t parseAsciiFloat(uint8_t* buf, uint16_t len, float* result){
+  uint32_t error = COMMS_ERROR_NONE;
+  float output = 0.0;
+  uint16_t i=0, decimalIdx = 0;
+  bool decimal = false;
+  bool negative = false;
+  /* Check for negative */
+  if(buf[0] == '-'){
+    /* Replace with a zero for parsing */
+    buf[0] = '0';
+    negative = true;
+  }
+  /* Validate characters and find the decimal point */
+  for(i=0; i<len; i++){
+    uint8_t data = buf[i];
+    /* Valid digit, do nothing */
+    if(data >= '0' && data <= '9'){}
+    /* Indicate that a decimal was found */
+    else if(data == '.'){
+      /* A decimal was already found */
+      if(decimal){
+        error = COMMS_ERROR_VAL;
+        *result = i;
+        break;
+      }
+      decimalIdx = i;
+      decimal = true;
+    } 
+    /* Illegal character */
+    else {
+      error = COMMS_ERROR_VAL;
+      /* Offending character position */
+      *result = i;
+      break;
+    }
+  }
+  /* Valid data, continue with parsing */
+  if(!error){
+    /* A decimal was found */
+    if(decimal) {
+      /* Integer */
+      for(i=0; i<decimalIdx; i++){
+        /* Get value of digit */
+        uint8_t val = buf[(decimalIdx-1)-i] - '0';
+        output += val * pow10[i];
+      }
+      /* Fractional */
+      for(i=0; i<len-decimalIdx-1; i++){
+        /* Get value of digit */
+        uint8_t val = buf[i + decimalIdx + 1] - '0';
+        output += val / pow10[i+1];
+      }
+    }
+    /* No decimal */
+    else {
+      for(i=0; i<len; i++){
+        /* Get value of digit */
+        uint8_t val = buf[(len-1)-i] - '0';
+        output += val * pow10[i];
+      }
+    }
+    /* Account for negative */
+    if(negative){
+      output = output * -1.0;
+      /* Replace negative sign */
+      buf[0] = '-';
+    }
+    /* Place output in array */
+    *result = output;
+  }
+
+
+  return error;
+}
+
 
 
 /* [] END OF FILE */
