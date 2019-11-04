@@ -19,6 +19,7 @@
 ********************************************************************************/
 #include "buckModule.h"
 
+
 /*******************************************************************************
 * Function Name: buck_writeReg()
 ****************************************************************************//**
@@ -45,6 +46,38 @@ uint32_t  buck_writeReg(BUCK_STATE_S* state, uint8_t addr, uint8_t val) {
     error = COMMS_ERROR_I2C;
   } else {
     uint32_t i2cError = state->i2c->write(state->deviceAddr, addr, val);
+    /* Place output error in the state struct */
+    error |= i2cError ? COMMS_ERROR_WRITE : COMMS_ERROR_NONE;
+    if (error) {
+      state->error = i2cError;
+    }
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_writeCmd()
+****************************************************************************//**
+* \brief
+*   Writes to a command (single byte) to the Buck Module 
+*
+* \param state [in/out]
+*   Pointer to the state struct
+*
+* \param cmd [in]
+*   Address of the register
+*  
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_writeCmd(BUCK_STATE_S* state, uint8_t cmd) {
+  /* Ensure state exists */
+  uint32_t error = Comms_validateI2C(state->i2c);
+  if(error){
+    state->error = error;
+    error = COMMS_ERROR_I2C;
+  } else {
+    uint32_t i2cError = state->i2c->writeCmd(state->deviceAddr, cmd);
     /* Place output error in the state struct */
     error |= i2cError ? COMMS_ERROR_WRITE : COMMS_ERROR_NONE;
     if (error) {
@@ -180,15 +213,21 @@ uint32_t  buck_readArray(BUCK_STATE_S* state, uint8_t addr, uint8_t *val, uint8_
 *******************************************************************************/
 uint32_t buck_start(BUCK_STATE_S* state) {
   uint32_t error = COMMS_ERROR_NONE;
-  /* Read ID value */
-  uint8_t readVal = 0;
-  error |= buck_readReg(state, BUCK_ADDR_ID, &readVal);
+  /* Reset the device */
+  error |= buck_reset(state);
+  /* Wait for reset */
+  state->timing->delayMs(10);
   if(!error) {
-    if(readVal != BUCK_ID_VAL){
-      error = COMMS_ERROR_START;
-      state->error = readVal;
-    }
-  }
+      /* Read ID value */
+      uint8_t readVal = 0;
+      error |= buck_readReg(state, BUCK_ADDR_ID, &readVal);
+      if(!error) {
+        if(readVal != BUCK_ID_VAL){
+          error = COMMS_ERROR_START;
+          state->error = readVal;
+        }
+      }
+}
   return error;
 }
 
@@ -217,6 +256,29 @@ uint32_t buck_setMode(BUCK_STATE_S* state, BUCK_MODE_T mode) {
 }
 
 /*******************************************************************************
+* Function Name: buck_getMode()
+****************************************************************************//**
+* \brief
+*   Gets the device state
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getMode(BUCK_STATE_S* state){
+  uint32_t error = COMMS_ERROR_NONE;
+    uint8_t mode;
+  error |= buck_readReg(state, BUCK_ADDR_MODE, &mode);
+  if(!error) {
+    state->mode = mode;
+  }
+  return error;
+}
+
+
+/*******************************************************************************
 * Function Name: buck_setDuty()
 ****************************************************************************//**
 * \brief
@@ -240,8 +302,61 @@ uint32_t buck_setDuty(BUCK_STATE_S* state, uint8_t duty) {
   return error;
 }
 
+
 /*******************************************************************************
-* Function Name: buck_setDuty()
+* Function Name: buck_setRefV()
+****************************************************************************//**
+* \brief
+*   Sets the reference voltage
+*
+* \param state [in/out]
+*   Pointer to the state struct
+*
+* \param refV [in]
+*   Reference in Volts
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_setRefV(BUCK_STATE_S* state, float refV) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  float2Byte(refV, fBytes);
+  error |= buck_writeArray(state, BUCK_ADDR_VREF, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    state->refV = refV;
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_setRefI()
+****************************************************************************//**
+* \brief
+*   Sets the reference current
+*
+* \param state [in/out]
+*   Pointer to the state struct
+*
+* \param refV [in]
+*   Reference in Volts
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_setRefI(BUCK_STATE_S* state, float refI) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  float2Byte(refI, fBytes);
+  error |= buck_writeArray(state, BUCK_ADDR_IREF, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    state->refI = refI;
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getDuty()
 ****************************************************************************//**
 * \brief
 *   Sets the device open loop duty cycle
@@ -265,6 +380,56 @@ uint32_t buck_getDuty(BUCK_STATE_S* state) {
   return error;
 }
 
+
+/*******************************************************************************
+* Function Name: buck_getRefV()
+****************************************************************************//**
+* \brief
+*   Gets the reference voltage
+*
+* \param state [in/out]
+*   Pointer to the state struct
+*
+* \param refV [in]
+*   Reference in Volts
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getRefV(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_DUTY, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->refV);
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getRefI()
+****************************************************************************//**
+* \brief
+*   Gets the reference current
+*
+* \param state [in/out]
+*   Pointer to the state struct
+*
+* \param refV [in]
+*   Reference in Volts
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getRefI(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_DUTY, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->refI);
+  }
+  return error;
+}
 
 /*******************************************************************************
 * Function Name: buck_getCurrent()
@@ -310,5 +475,48 @@ uint32_t buck_getVoltage(BUCK_STATE_S* state){
   return error;
 }
 
+
+/*******************************************************************************
+* Function Name: buck_getSense()
+****************************************************************************//**
+* \brief
+*   Get the voltage, current and power in a single call
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getSense(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[3*BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_SENSE, fBytes, 3*BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->measV);
+    byte2Float(&fBytes[4], &state->measI);
+    byte2Float(&fBytes[8], &state->measP);
+  }
+  return error;
+}
+
+
+/*******************************************************************************
+* Function Name: buck_reset()
+****************************************************************************//**
+* \brief
+*   Initiate a software reset
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_reset(BUCK_STATE_S* state){
+  uint32_t error = COMMS_ERROR_NONE;
+  error = buck_writeCmd(state, BUCK_ADDR_RESET);
+  return error;
+}
 
 /* [] END OF FILE */

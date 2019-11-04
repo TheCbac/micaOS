@@ -173,6 +173,9 @@ uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
     if(!opError) {
         /* Wait for the transfer to complete */
         while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+        /* This is a hack - when implementing an I2C slave on a PSoC, it needs time to service
+        the write command and load the data into the read buffer */
+        CyDelayUs(2000);
         /* Initiate the read */
         opError = I2C_I2CMasterReadBuf(deviceAddr, result, 1, I2C_I2C_MODE_COMPLETE_XFER );
         /* Ensure write was successful */
@@ -224,6 +227,9 @@ uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultA
     if(!opError) {
         /* Wait for the transfer to complete */
         while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
+        /* This is a hack - when implementing an I2C slave on a PSoC, it needs time to service
+        the write command and load the data into the read buffer */
+        CyDelayUs(2000);
         /* Initiate the read */
         opError = I2C_I2CMasterReadBuf(deviceAddr, resultArray, len, I2C_I2C_MODE_COMPLETE_XFER );
         /* Ensure write was successful */
