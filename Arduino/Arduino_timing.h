@@ -1,7 +1,7 @@
 /***************************************************************************
 *                                 MICA  © 2019
 *
-* File: filename.h
+* File: Arduino_timing.h
 * Workspace: micaOS
 * Version: v2.0.0
 * Author: Craig Cheney
@@ -13,12 +13,12 @@
 ********************************************************************************/
 
 /* Header Guard */
-#ifndef FILENAME_H
-  #define FILENAME_H
+#ifndef ARDUINO_TIMING_H
+  #define ARDUINO_TIMING_H
   /***************************************
   * Included files
   ***************************************/
-
+  #include "micaTiming.h"
   /***************************************
   * Macro Definitions
   ***************************************/
@@ -35,6 +35,8 @@
   /***************************************
   * Function declarations 
   ***************************************/
-
-#endif /* FILENAME_H */
+  uint32_t timingArduino_start(TIMING_S* state);
+  uint32_t timingArduino_delayMs(uint32_t millis);
+ 
+#endif /* ARDUINO_TIMING_H */
 /* [] END OF FILE */

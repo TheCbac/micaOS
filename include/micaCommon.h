@@ -45,6 +45,9 @@
     #define SIXTEEN         (16u)   /**< Constant 16 */
     
     #define NULL_OCTET      (0u)    /**< Null Octet */
+    #ifndef NULL
+        #define NULL            (0)
+    #endif /* NULL */
     
     #define PI              (3.14159265358979f) /**< Pi */
     
@@ -90,9 +93,11 @@
     #define MICA_DELAY_US_SEC_HALF      (500000)        /**< Delay in us for 0.5 second  */
     #define MICA_DELAY_US_SEC_ONE       (1000000)       /**< Delay in us for 1.0 second  */
     
+    
 
     // #define MICA_delayMs(val)     CyDelay(val)    /**< Delay function */
     // #define MICA_softwareReset()    CySoftwareReset() /**< Software reset function */
+    #define twosComp2Signed(tComp, bits) (tComp & (bits-1)) ? tComp | ~((1<<bits)-1) : tComp
     
     /***************************************
     * Structs

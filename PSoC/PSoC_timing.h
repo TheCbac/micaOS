@@ -1,7 +1,7 @@
 /***************************************************************************
 *                                 MICA  © 2019
 *
-* File: filename.h
+* File: PSoC_timing.h
 * Workspace: micaOS
 * Version: v2.0.0
 * Author: Craig Cheney
@@ -13,12 +13,12 @@
 ********************************************************************************/
 
 /* Header Guard */
-#ifndef FILENAME_H
-  #define FILENAME_H
+#ifndef PSOC_TIMING_H
+  #define PSOC_TIMING_H
   /***************************************
   * Included files
   ***************************************/
-
+  #include "micaTiming.h"
   /***************************************
   * Macro Definitions
   ***************************************/
@@ -35,6 +35,9 @@
   /***************************************
   * Function declarations 
   ***************************************/
-
-#endif /* FILENAME_H */
+  uint32_t timingPsoc_start(TIMING_S* state);
+  uint32_t timingPsoc_delayMs(uint32_t millis);
+  void timingPsoc_reset(void);
+ 
+#endif /* PSOC_TIMING_H */
 /* [] END OF FILE */
