@@ -63,13 +63,21 @@ void PID_updateState(pidState_S *state) {
     state->D = state->Ad*state->D - state->Bd*(y - state->yPrev);
     /* Compute intermediate output */
     float v = P + state->I + state->D;
+    /* Log NaN */
+    if (v != v) {
+        state->errorFlags = PID_ERROR_NAN;
+    }
     /* Anti-windup */
     float u = v < state->uMin ? state->uMin : v;
     u = u > state->uMax ? state->uMax : u;
+//    if(u > state->uMax) {
+//        u = state->uMax;
+//        state->errorFlags = PID_ERROR_WIND;
+//    }
     /* Write out the control effort */
     state->effort = u;
     /* Update the integral term (see 10.19) */
-    state->I = state->I + state->Ai*(state->setpoint-y) + state->Ai*(u-v);
+    state->I += state->Ai*(state->setpoint-y) + state->Ai*(u-v);
     /* Store the previous process variable */
     state->yPrev = y;
 }

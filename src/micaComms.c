@@ -119,16 +119,19 @@ void float2Byte(float fIn, uint8_t* array) {
 }
 
 /*******************************************************************************
-* Function Name: Comms_validateSpi()
+* Function Name: byte2Float()
 ****************************************************************************//**
 * \brief
-*  Validate the UART communication structure provided
+*  Converts a byte array to a float 
 *
-* \param i2c
-*  Pointer to the UART Struct
+* \param array [in]
+* Input array. Must be at lease 4 bytes long
+*
+* \param fOut [out]
+*  Resulting float
 *
 * \return
-*  An error code with the result
+*  none
 *******************************************************************************/
 void byte2Float(uint8_t* array, float* fOut) {
   floatByte_U data;
@@ -138,5 +141,56 @@ void byte2Float(uint8_t* array, float* fOut) {
   }
   *fOut = data.num;
 }
+
+/*******************************************************************************
+* Function Name: uint32ToByte()
+****************************************************************************//**
+* \brief
+*  Converts a uin32_t to an array
+*
+* \param in [in]
+*  Uint32 input
+*
+* \param array [out]
+*  Output array. Must be at lease 4 bytes long
+*
+* \return
+*  none
+*******************************************************************************/
+void uint32ToByte(uint32_t in, uint8_t* array) {
+  uint32Byte_U data;
+  data.num = in;
+  uint8_t i;
+  for(i=0; i<BYTES_PER_UINT32; i++) {
+    array[i] = data.bytes[i];
+  }
+}
+
+
+/*******************************************************************************
+* Function Name: byte2Float()
+****************************************************************************//**
+* \brief
+*  Converts a byte array to a float 
+*
+* \param array [in]
+* Input array. Must be at least 4 bytes long
+*
+* \param out [out]
+*  Resulting uin3t2_t
+*
+* \return
+*  none
+*******************************************************************************/
+void ByteToUint32(uint8_t* array, uint32_t* out){  
+  uint32Byte_U data;
+  uint8_t i;
+  for(i=0; i<BYTES_PER_UINT32; i++){
+    data.bytes[i] = array[i];
+  }
+  *out = data.num;
+}
+
+
 
 /* [] END OF FILE */

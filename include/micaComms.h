@@ -61,6 +61,7 @@
   
   #define COMMS_DEFAULT_BAUD                  (115200)
   #define BYTES_PER_FLOAT                     (4) /* Number of bytes in a float */
+  #define BYTES_PER_UINT32                    (4) /* Number of bytes in a uint32_t */
   #define COMMS_I2C_MASK_READ                 (0x01)
   /***************************************
   * Structs
@@ -106,6 +107,13 @@
     float num;
     uint8_t bytes[BYTES_PER_FLOAT];
   } floatByte_U; 
+
+    /* Float to Byte array */
+  typedef union {
+    uint32_t num;
+    uint8_t bytes[BYTES_PER_UINT32];
+  } uint32Byte_U; 
+
   /***************************************
   * Function Prototypes
   ***************************************/ 
@@ -115,6 +123,8 @@
 
   void float2Byte(float fIn, uint8_t* array);
   void byte2Float(uint8_t* array, float* fOut);
+  void uint32ToByte(uint32_t in, uint8_t* array);
+  void ByteToUint32(uint8_t* array, uint32_t* out);
 
 #endif /* MICA_COMMS_H */
 

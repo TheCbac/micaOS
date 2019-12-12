@@ -432,6 +432,30 @@ uint32_t buck_getRefI(BUCK_STATE_S* state) {
 }
 
 /*******************************************************************************
+* Function Name: buck_getSense()
+****************************************************************************//**
+* \brief
+*   Get the voltage, current and power in a single call
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getSense(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[3*BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_SENSE, fBytes, 3*BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->measV);
+    byte2Float(&fBytes[4], &state->measI);
+    byte2Float(&fBytes[8], &state->measP);
+  }
+  return error;
+}
+
+/*******************************************************************************
 * Function Name: buck_getCurrent()
 ****************************************************************************//**
 * \brief
@@ -476,11 +500,15 @@ uint32_t buck_getVoltage(BUCK_STATE_S* state){
 }
 
 
+
 /*******************************************************************************
-* Function Name: buck_getSense()
+* Function Name: buck_setMaxV()
 ****************************************************************************//**
 * \brief
-*   Get the voltage, current and power in a single call
+*   Set the voltage limit
+*
+* \param maxV [in]
+* Voltage limit [V]
 *
 * \param state [in/out]
 *   Pointer to the state struct
@@ -488,18 +516,158 @@ uint32_t buck_getVoltage(BUCK_STATE_S* state){
 * \return
 *   Error code of the operation
 *******************************************************************************/
-uint32_t buck_getSense(BUCK_STATE_S* state) {
+uint32_t buck_setMaxV(BUCK_STATE_S* state, float maxV) {
   uint32_t error = COMMS_ERROR_NONE;
-  uint8_t fBytes[3*BYTES_PER_FLOAT];
-  error |= buck_readArray(state, BUCK_ADDR_SENSE, fBytes, 3*BYTES_PER_FLOAT);
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  float2Byte(maxV, fBytes);
+  error |= buck_writeArray(state, BUCK_ADDR_MAXV, fBytes, BYTES_PER_FLOAT);
   if(!error) {
-    byte2Float(fBytes, &state->measV);
-    byte2Float(&fBytes[4], &state->measI);
-    byte2Float(&fBytes[8], &state->measP);
+    state->maxV= maxV;
   }
   return error;
 }
 
+/*******************************************************************************
+* Function Name: buck_setMaxI()
+****************************************************************************//**
+* \brief
+*   Set the Current limit
+*
+* \param maxI [in]
+* Current limit [A]
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_setMaxI(BUCK_STATE_S* state, float maxI) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  float2Byte(maxI, fBytes);
+  error |= buck_writeArray(state, BUCK_ADDR_MAXI, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    state->maxI= maxI;
+  }
+  return error;
+}
+
+
+/*******************************************************************************
+* Function Name: buck_setMaxP()
+****************************************************************************//**
+* \brief
+*   Set the Power limit
+*
+* \param maxP [in]
+* Power limit [W]
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_setMaxP(BUCK_STATE_S* state, float maxP) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  float2Byte(maxP, fBytes);
+  error |= buck_writeArray(state, BUCK_ADDR_MAXP, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    state->maxP= maxP;
+  }
+  return error;
+}
+
+
+/*******************************************************************************
+* Function Name: buck_getMaxV()
+****************************************************************************//**
+* \brief
+*   Get the Voltage max on the device
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getMaxV(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_MAXV, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->maxV);
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getMaxI()
+****************************************************************************//**
+* \brief
+*   Get the Current max on the device
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getMaxI(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_MAXI, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->maxI);
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getMaxV()
+****************************************************************************//**
+* \brief
+*   Get the power max on the device
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getMaxP(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t fBytes[BYTES_PER_FLOAT];
+  error |= buck_readArray(state, BUCK_ADDR_MAXP, fBytes, BYTES_PER_FLOAT);
+  if(!error) {
+    byte2Float(fBytes, &state->maxP);
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: buck_getError()
+****************************************************************************//**
+* \brief
+*   Get the Error on the device
+*
+* \param state [in/out]
+*   Pointer to the state struct
+* 
+* \return
+*   Error code of the operation
+*******************************************************************************/
+uint32_t buck_getError(BUCK_STATE_S* state) {
+  uint32_t error = COMMS_ERROR_NONE;
+  uint8_t bytes[BYTES_PER_UINT32];
+  error |= buck_readArray(state, BUCK_ADDR_ERROR, bytes, BYTES_PER_UINT32);
+  if(!error) {
+    ByteToUint32(bytes, &state->error);
+  }
+  return error;
+}
 
 /*******************************************************************************
 * Function Name: buck_reset()

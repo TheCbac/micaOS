@@ -23,10 +23,18 @@
     /***************************************
     * Included files
     ***************************************/
-   
+    #include <stdint.h>
     /***************************************
     * Macro Definitions
     ***************************************/
+    #define PID_ERROR_SHIFT_NAN     (0)   /* Not a number */
+    #define PID_ERROR_SHIFT_WIND    (1)   /* Anti-windup was triggered*/
+    
+    
+    #define PID_ERROR_NONE          (0)   /* No error (success) */
+    #define PID_ERROR_NAN           (1u << PID_ERROR_SHIFT_NAN) /* NaN in control effort */
+    #define PID_ERROR_WIND           (1u << PID_ERROR_SHIFT_WIND) /* Anti-windup was triggered*/
+    
     
     /***************************************
     * Enumerated Types
@@ -62,9 +70,7 @@
         float D;                /**< [Internal] Derivate term */
         float yPrev;            /**< [Internal] The last output */
 
-//        FUNCTION_GET_FLOAT_T *getReferenceVal;      /**< [Input] Function to call when updating the reference variable */
-//        FUNCTION_GET_FLOAT_T *getProcessVal;        /**< [Input] Function to call when updating the process variable */
-//        FUNCTION_SET_FLOAT_T *setControlEffort;     /**< [Input] Function to call when commanding out new effor */
+        uint32_t errorFlags;  /* Error flags of the system. NOT the controller error, rather an indicator something went wrong */
     } pidState_S;
     
     /***************************************

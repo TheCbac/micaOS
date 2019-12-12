@@ -506,5 +506,59 @@ uint32_t parseAsciiFloat(uint8_t* buf, uint16_t len, float* result){
 }
 
 
+/*******************************************************************************
+* Function Name: getInputFloat()
+****************************************************************************//**
+* \brief Blocking function to get an input float via the UART
+* 
+* \param uart [in]
+*   Pointer to the UART   
+*
+* \param result [out]
+*    Pointer to the float to place the result
+*
+* \return
+* The error code of the operation
+*******************************************************************************/
+uint32_t getInputFloat(COMMS_UART_S* uart, float* result) {
+    uint8_t avail=0, input=0, inputBuffer[10]= {0};
+    uint32_t error = COMMS_ERROR_NONE;
+    print(uart, "Input: ");
+    bool inputComplete = false;
+    /* Reset the index */
+    uint8_t idx = 0;
+    while(!inputComplete) {
+        /* Get new input */
+        uart->getRxBufferSize(&avail);
+        input=0;
+        if(avail){
+            uart->read(&input);   
+            /* Complete */
+            if(input == '\r') {
+                /* Get rid of the newline character */
+                uint8_t dummy;
+                uart->read(&dummy);
+                /* Parse the input */
+                inputComplete = true;
+                float f;
+                error = parseAsciiFloat(inputBuffer, idx, &f);
+                if(!error) {
+                    *result = f;
+                    printLn(uart, "");
+                } else {
+                    uint8_t errorIdx = (uint8_t) *result;
+                    printLn(uart, "\r\nInvalid character at Pos: %i, \'%c\'\n", errorIdx, inputBuffer[errorIdx]);   
+                }
+            } 
+            /* Echo and store */
+            else {
+                uart->write(input);
+                inputBuffer[idx++] = input;                           
+            }
+        }  
+    }
+    return error;
+}
+
 
 /* [] END OF FILE */
