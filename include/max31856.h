@@ -54,7 +54,7 @@
 
 
     /* SPI */
-    #define MAX318526_MASK_WRITEADDR            (0x80)     /* Mask for writing to addresses */
+    #define MAX31856_MASK_WRITEADDR            (0x80)     /* Mask for writing to addresses */
     /* Configuration Register 0 (CR0) */
     #define MAX31856_CR0_ADDR               (0x00)     /**< Address of Configuration 0 Register */
     #define MAX31856_CR0_VAL                (0x00)     /**< Default value of Configuration 0 Register */

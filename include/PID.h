@@ -2,14 +2,12 @@
 *                                 MICA  © 2019
 *                           MIT BioInstrumentation Lab
 *
-* File: PID.h
-* Workspace: gameBoard
-* Project: orbiter_v1
+* File: PID.c
+* Project: micaOS
 * Version: 1.0.0
 * Authors: C. Cheney
 * 
-* PCB: mcuPsoc4 5.2.1
-* PSoC: CY8C4245LQI-483
+* PCB: Generic
 *
 * Brief:
 *   Header for PID.c
