@@ -3,16 +3,15 @@
 *                           MIT BioInstrumentation Lab
 *
 * File: PID.c
-* Workspace: gameBoard
-* Project: orbiter_v1
+* Project: micaOS
 * Version: 1.0.0
 * Authors: C. Cheney
 * 
-* PCB: mcuPsoc4 5.2.1
-* PSoC: CY8C4245LQI-483
+* PCB: Generic
 *
 * Brief:
-*   Discrete PID controller. See http://www.cds.caltech.edu/~murray/books/AM08/pdf/am06-pid_16Sep06.pdf
+*   Discrete PID controller. See:
+*   http://www.cds.caltech.edu/~murray/books/AM08/pdf/am06-pid_16Sep06.pdf
 *
 * 2019.04.16  - Document Created
 ********************************************************************************/
@@ -70,10 +69,6 @@ void PID_updateState(pidState_S *state) {
     /* Anti-windup */
     float u = v < state->uMin ? state->uMin : v;
     u = u > state->uMax ? state->uMax : u;
-//    if(u > state->uMax) {
-//        u = state->uMax;
-//        state->errorFlags = PID_ERROR_WIND;
-//    }
     /* Write out the control effort */
     state->effort = u;
     /* Update the integral term (see 10.19) */

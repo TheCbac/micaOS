@@ -81,7 +81,7 @@ uint32_t MAX31856_writeReg(MAX31856_STATE_S* state, uint8_t addr, uint8_t val){
         /* Set slave active */
         error|= state->spi->setActive(state->slaveId);
         /* Places results into val */
-        uint32_t spiError = state->spi->write( (addr | MAX318526_MASK_WRITEADDR), val);
+        uint32_t spiError = state->spi->write( (addr | MAX31856_MASK_WRITEADDR), val);
         /* Place output error in the state struct */
         error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
@@ -148,7 +148,7 @@ uint32_t MAX31856_writeArray(MAX31856_STATE_S* state, uint8_t addr, uint8_t *arr
         /* Set slave active */
         error|= state->spi->setActive(state->slaveId);
         /* Places results into Array */
-        uint32_t spiError = state->spi->writeArray((addr | MAX318526_MASK_WRITEADDR), array, len);
+        uint32_t spiError = state->spi->writeArray((addr | MAX31856_MASK_WRITEADDR), array, len);
         /* Place output error in the state struct */
         error |= spiError ? COMMS_ERROR_SPI : COMMS_ERROR_NONE;
         if(error){state->error = spiError;}
