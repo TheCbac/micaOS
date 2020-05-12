@@ -75,13 +75,13 @@ const uint8_t SevenSeg_charArray[26] = {
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, uint8_t addr, COMMS_I2C_S *i2c){
+uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, COMMS_I2C_S *i2c, uint8_t addr){
   uint32_t error = SEVENSEG_ERROR_NONE; 
 
   /* Start the TCA port expander */
   state->_tca.deviceAddr = addr;
   state->_tca.i2c = i2c;
-  error |= TCA9535_start(&state->_tca);
+  error |= TCA9535_start(&state->_tca, i2c, addr);
   /* On success */
   if(!error) {
     /* configure as Output */
@@ -199,8 +199,8 @@ uint32_t SEVENSEG_displayNum(SEVENSEG_STATE_S* state, uint16_t val) {
       msb = val / 100;
     }
     /* Update character numbers */
-    SEVENSEG_mapChar(lsb, state->_char0);
-    SEVENSEG_mapChar(msb, state->_char1);
+    SEVENSEG_mapChar(lsb, &state->_char0);
+    SEVENSEG_mapChar(msb, &state->_char1);
     /* Set Decimal Points */
     if(dpl) {state->_char0 |= SEVENSEG_CHAR_DOT; }
     if(dpm) {state->_char1 |= SEVENSEG_CHAR_DOT; }

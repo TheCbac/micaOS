@@ -57,7 +57,7 @@
   #define SEVENSEG_CHAR_N                  (0b0110111) /**< 7-Segment display value of 'N' */
   #define SEVENSEG_CHAR_O                  (0b0111111) /**< 7-Segment display value of 'O' */
   #define SEVENSEG_CHAR_P                  (0b1110011) /**< 7-Segment display value of 'P' */
-  #define SEVENSEG_CHAR_K                  (0b1100111) /**< 7-Segment display value of 'K' */
+  #define SEVENSEG_CHAR_Q                  (0b1100111) /**< 7-Segment display value of 'K' */
   #define SEVENSEG_CHAR_R                  (0b1010000) /**< 7-Segment display value of 'R' */
   #define SEVENSEG_CHAR_S                  (0b1101101) /**< 7-Segment display value of 'S' */
   #define SEVENSEG_CHAR_T                  (0b1000110) /**< 7-Segment display value of 'T' */
@@ -98,7 +98,7 @@
   /***************************************
   * Function declarations 
   ***************************************/
-  uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, uint8_t addr, COMMS_I2C_S *i2c);
+  uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, COMMS_I2C_S *i2c, uint8_t addr);
   uint32_t SEVENSEG_update(SEVENSEG_STATE_S* state);
   uint32_t SEVENSEG_mapChar(uint8_t val, uint8_t * display);
   uint32_t SEVENSEG_displayNum(SEVENSEG_STATE_S* state, uint16_t val);
