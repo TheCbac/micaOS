@@ -61,7 +61,7 @@
   ***************************************/
   uint32_t TCA9535_writeReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t val);
   uint32_t TCA9535_readReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t* val);
-  uint32_t TCA9535_start(TCA9535_STATE_S* state);
+  uint32_t TCA9535_start(TCA9535_STATE_S* state, COMMS_I2C_S* i2c, uint8_t i2cAddr);
   uint32_t TCA9535_setMode(TCA9535_STATE_S * state, uint16_t mode);
   uint32_t TCA9535_setPolarity(TCA9535_STATE_S * state, uint16_t polarity);
   uint32_t TCA9535_write(TCA9535_STATE_S * state, uint16_t val);

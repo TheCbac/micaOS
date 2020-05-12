@@ -114,25 +114,41 @@ uint32_t TCA9535_readReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t* val)
 *
 * \param state [in/out]
 * Pointer to the state struct
+*
+* \param i2c [in]
+* Pointer to the i2c comms struct
+*
+* \param i2cAddr [in]
+* Value of the device I2C Address
 *  
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t TCA9535_start(TCA9535_STATE_S* state){
+uint32_t TCA9535_start(TCA9535_STATE_S* state, COMMS_I2C_S* i2c, uint8_t i2cAddr){
   uint32_t error = COMMS_ERROR_NONE;
-  /* Test connectivity on Output Port 0 */
-  uint16_t readData = 0x00;
-  error |= TCA9535_writeReg(state, TCA9535_ADDR_OUTPUT0, TCA9535_TEST_VAL);
-  error |= TCA9535_readReg(state, TCA9535_ADDR_OUTPUT0, &readData);
-  /* Ensure read byte matches reset error */
-  if(error || readData != TCA9535_TEST_VAL){
-    state->error = readData;
-    error = COMMS_ERROR_START;
-  } 
-  /* Success, reset to default state */
-  else {
-    error |= TCA9535_writeReg(state, TCA9535_ADDR_OUTPUT0, TCA9535_OUTPUT_DEFAULT);
+  state->deviceAddr = i2cAddr;
+  state->i2c = i2c;
+  error |= Comms_validateI2C(state->i2c);
+  if(!error) {
+    
+    /* Test connectivity on Output Port 0 */
+    uint16_t readData = 0x00;
+    error |= TCA9535_writeReg(state, TCA9535_ADDR_OUTPUT, TCA9535_TEST_VAL);
+    error |= TCA9535_readReg(state, TCA9535_ADDR_OUTPUT, &readData);
+    /* Ensure read byte matches reset error */
+    if(error || (readData != TCA9535_TEST_VAL)){
+      state->error = readData;
+      error |= COMMS_ERROR_START;
+    } 
+    /* Success, reset to default state */
+    else {
+      error |= TCA9535_writeReg(state, TCA9535_ADDR_OUTPUT, TCA9535_OUTPUT_DEFAULT);
+    }
   }
+  else {
+    error |= COMMS_ERROR_START | COMMS_ERROR_I2C; 
+  }
+
   return error;
 }
 
