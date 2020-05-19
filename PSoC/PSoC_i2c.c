@@ -30,14 +30,14 @@
 * \return
 * An error code with the result of the start procedure 
 *******************************************************************************/
-uint32_t i2cPsoc_start(COMMS_I2C_S *i2c){
+uint32_t i2cPsoc_start(COMMS_I2C_S *const i2c){
   /* Register the Psoc commands with the COMMS struct */
   i2c->write = i2cPsoc_write;
   i2c->writeCmd = i2cPsoc_writeCmd;
   i2c->writeArray = i2cPsoc_writeArray;
   i2c->read = i2cPsoc_read;
-  i2c->readCmd = i2cPsoc_readCmd;
   i2c->readArray = i2cPsoc_readArray;
+  i2c->readCmd = i2cPsoc_readCmd;
   /* Start the bus */
   I2C_Start();
   return COMMS_ERROR_NONE;
@@ -214,24 +214,22 @@ uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result) {
 * \Return
 *   Error associated with the read value
 *******************************************************************************/
-uint32_t i2cPsoc_readCmd(uint8_t deviceAddr, uint8_t *result, uint16_t len){
-    /* Send the Register address */
-    uint32_t error = COMMS_ERROR_NONE;
-    /* Wait for the transfer to complete */
-    while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)){} 
-    /* Initiate the read */
-    uint32_t opError = I2C_I2CMasterReadBuf(deviceAddr, result, len, I2C_I2C_MODE_COMPLETE_XFER );
-    /* Ensure write was successful */
-    if(!opError) {
-        /* Wait for transfer to be complete */
-        while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)){}
-    } else {
-        /* Report errors */
-        error = COMMS_ERROR_READ_ARRAY;
-        result[0] = opError; 
-    }    
-    return error;
-}
+ uint32_t i2cPsoc_readCmd(uint8_t deviceAddr, uint8_t *result, uint16_t len){
+     /* Send the Register address */
+     uint32_t error = COMMS_ERROR_NONE;
+     /* Initiate the read */
+     uint32_t opError = I2C_I2CMasterReadBuf(deviceAddr, result, len, I2C_I2C_MODE_COMPLETE_XFER );
+     /* Ensure write was successful */
+     if(!opError) {
+         /* Wait for transfer to be complete */
+         while(0u == (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)){}
+     } else {
+         /* Report errors */
+         error = COMMS_ERROR_READ_ARRAY;
+         result[0] = opError; 
+     }    
+     return error;
+ }
 
 
 /*******************************************************************************
