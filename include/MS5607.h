@@ -11,7 +11,7 @@
 * PCB: N/A 
 *
 * Brief:
-*   Header for MS5607.c
+*   Header for MS5607.c Pressure sensor 
 *
 * 2020.05.12  - Document Created
 ********************************************************************************/
