@@ -76,8 +76,16 @@
     bool _G;     /* State of G LED */
     bool _B;     /* State of B LED */
     bool _activeLow; /* If this is set to high, values are inverted before being written to the pins  */
-    bool _init;
+    bool _init;   /* initialization variable */
   } RGB_S; 
+
+  /* Default struct to initialize - guarantees _init is 0 */
+  const RGB_S RGB_DEFAULT = {
+    ._RGB_pin_R_Write = NULL,
+    ._RGB_pin_G_Write = NULL,
+    ._RGB_pin_B_Write = NULL,
+    ._init = false
+  };
   /***************************************
   * Function declarations 
   ***************************************/
