@@ -22,7 +22,7 @@
   /***************************************
   * Included files
   ***************************************/
-  #include <stdbool.h>
+  #include "micaCommon.h"
   /***************************************
   * Function declarations 
   ***************************************/
@@ -69,9 +69,9 @@
   * Structures
   ***************************************/
   typedef struct {
-    void (*_RGB_pin_R_write) (bool pinVal);    /* Generic function to write Red LED pin state */
-    void (*_RGB_pin_G_write) (bool pinVal);    /* Generic function to write Green LED pin state */
-    void (*_RGB_pin_B_write) (bool pinVal);    /* Generic function to write Blue LED pin state */
+    void (*_RGB_pin_R_Write) (bool pinVal);    /* Generic function to write Red LED pin state */
+    void (*_RGB_pin_G_Write) (bool pinVal);    /* Generic function to write Green LED pin state */
+    void (*_RGB_pin_B_Write) (bool pinVal);    /* Generic function to write Blue LED pin state */
     bool _R;     /* State of R LED */
     bool _G;     /* State of G LED */
     bool _B;     /* State of B LED */

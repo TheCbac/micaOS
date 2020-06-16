@@ -36,9 +36,9 @@
 *******************************************************************************/
 uint32_t RGB_start(RGB_S *const state, bool activePinState){
   uint32_t error = RGB_ERROR_NONE;
-  error |= (state->RGB_pin_R_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
-  error |= (state->RGB_pin_G_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
-  error |= (state->RGB_pin_B_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->_RGB_pin_R_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->_RGB_pin_G_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->_RGB_pin_B_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
   if(!error) {
     state->_init = true;
     state->_activeLow = !activePinState;
@@ -74,9 +74,9 @@ uint32_t RGB_Write(RGB_S *const state, RGB_Colors_T color) {
     state->_B = (bool) color & RGB_B_MASK;
     /* Account for the active state */
     bool actLow = state->_activeLow;
-    state->_RGB_pin_R_write(actLow ^ state->_R);
-    state->_RGB_pin_G_write(actLow ^ state->_G);
-    state->_RGB_pin_B_write(actLow ^ state->_B);
+    state->_RGB_pin_R_Write(actLow ^ state->_R);
+    state->_RGB_pin_G_Write(actLow ^ state->_G);
+    state->_RGB_pin_B_Write(actLow ^ state->_B);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -102,7 +102,7 @@ uint32_t RGB_R_Write(RGB_S *const state, RGB_LED_T ledR) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
     state->_R=ledR;
-    state->_RGB_pin_R_write(state->_activeLow ^ state->_R);
+    state->_RGB_pin_R_Write(state->_activeLow ^ state->_R);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -128,7 +128,7 @@ uint32_t RGB_G_Write(RGB_S *const state, RGB_LED_T ledG) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
     state->_G=ledG;
-    state->_RGB_pin_G_write(state->_activeLow ^ state->_G);
+    state->_RGB_pin_G_Write(state->_activeLow ^ state->_G);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -154,7 +154,7 @@ uint32_t RGB_B_Write(RGB_S *const state, RGB_LED_T ledB) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
     state->_B=ledB;
-    state->_RGB_pin_B_write(state->_activeLow ^ state->_B);
+    state->_RGB_pin_B_Write(state->_activeLow ^ state->_B);
   } else {
     error = RGB_ERROR_INIT;
   }
