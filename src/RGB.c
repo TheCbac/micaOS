@@ -14,6 +14,7 @@
 *
 * Change Log:
 *   2018.02.28 CC - Document created
+*   2020.06.15 CC - Ported to generic struct
 ********************************************************************************/
 #include "RGB.h"
 
@@ -50,11 +51,10 @@ uint32_t RGB_start(RGB_S *const state, bool activePinState){
 }
 
 /*******************************************************************************
-* Function Name: RGB_start()
+* Function Name: RGB_Write()
 ****************************************************************************//**
 * \brief
-*   Checks to ensure the RGB pin functions are valid, sets the active low state,
-*   and turns all the LEDs off
+*  Writes a color to the RGB LED
 *
 * \param state [in/out]
 * Pointer to the state struct
