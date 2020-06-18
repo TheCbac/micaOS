@@ -62,27 +62,22 @@
   * Structures
   ***************************************/
   typedef struct {
-    void (*pin_R_Write) (uint8_t pinVal);    /* Generic function to write Red LED pin state */
-    void (*pin_G_Write) (uint8_t pinVal);    /* Generic function to write Green LED pin state */
-    void (*pin_B_Write) (uint8_t pinVal);    /* Generic function to write Blue LED pin state */
-    bool _R;     /* State of R LED */
-    bool _G;     /* State of G LED */
-    bool _B;     /* State of B LED */
+    void (*fn_pin_R_Write) (uint8_t pinVal);    /* Generic function to write Red LED pin state */
+    void (*fn_pin_G_Write) (uint8_t pinVal);    /* Generic function to write Green LED pin state */
+    void (*fn_pin_B_Write) (uint8_t pinVal);    /* Generic function to write Blue LED pin state */
+    bool _Red;     /* State of R LED */
+    bool _Green;     /* State of G LED */
+    bool _Blue;     /* State of B LED */
     bool _activeLow; /* If this is set to true, values are inverted before being written to the pins  */
     bool _init;   /* initialization variable */
   } RGB_S; 
 
   /* Default struct to initialize - guarantees _init is 0 */
-  const RGB_S RGB_DEFAULT_S = {
-    .pin_R_Write = NULL,
-    .pin_G_Write = NULL,
-    .pin_B_Write = NULL,
-    ._init = false,
-  };
+  extern const RGB_S RGB_DEFAULT_S;
   /***************************************
   * Function declarations 
   ***************************************/
-  uint32_t RGB_start(RGB_S *const state, bool activePinVal);
+  uint32_t RGB_Start(RGB_S *const state, bool activePinVal);
   uint32_t RGB_Write(RGB_S *const state, RGB_Colors_T color);
 
   uint32_t RGB_R_Write(RGB_S *const state, RGB_LED_T ledR);

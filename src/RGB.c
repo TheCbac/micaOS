@@ -18,9 +18,16 @@
 ********************************************************************************/
 #include "RGB.h"
 
+/* Default structure */
+const RGB_S RGB_DEFAULT_S = {
+  .fn_pin_R_Write = NULL,
+  .fn_pin_G_Write = NULL,
+  .fn_pin_B_Write = NULL,
+  ._init = false,
+  };
 
 /*******************************************************************************
-* Function Name: RGB_start()
+* Function Name: RGB_Start()
 ****************************************************************************//**
 * \brief
 *   Checks to ensure the RGB pin functions are valid, sets the active low state,
@@ -35,11 +42,11 @@
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t RGB_start(RGB_S *const state, bool activePinState){
+uint32_t RGB_Start(RGB_S *const state, bool activePinState){
   uint32_t error = RGB_ERROR_NONE;
-  error |= (state->_RGB_pin_R_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
-  error |= (state->_RGB_pin_G_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
-  error |= (state->_RGB_pin_B_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->fn_pin_R_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->fn_pin_G_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
+  error |= (state->fn_pin_B_Write == NULL) ? RGB_ERROR_NONE : RGB_ERROR_PINWRITE;
   if(!error) {
     state->_init = true;
     state->_activeLow = !activePinState;
@@ -69,14 +76,14 @@ uint32_t RGB_Write(RGB_S *const state, RGB_Colors_T color) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
     /* Update state variables */
-    state->_R = (bool) color & RGB_R_MASK;
-    state->_G = (bool) color & RGB_G_MASK;
-    state->_B = (bool) color & RGB_B_MASK;
+    state->_Red = (bool) color & RGB_R_MASK;
+    state->_Green = (bool) color & RGB_G_MASK;
+    state->_Blue = (bool) color & RGB_B_MASK;
     /* Account for the active state */
     bool actLow = state->_activeLow;
-    state->_RGB_pin_R_Write(actLow ^ state->_R);
-    state->_RGB_pin_G_Write(actLow ^ state->_G);
-    state->_RGB_pin_B_Write(actLow ^ state->_B);
+    state->fn_pin_R_Write(actLow ^ state->_Red);
+    state->fn_pin_G_Write(actLow ^ state->_Green);
+    state->fn_pin_B_Write(actLow ^ state->_Blue);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -101,8 +108,8 @@ uint32_t RGB_Write(RGB_S *const state, RGB_Colors_T color) {
 uint32_t RGB_R_Write(RGB_S *const state, RGB_LED_T ledR) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
-    state->_R=ledR;
-    state->_RGB_pin_R_Write(state->_activeLow ^ state->_R);
+    state->_Red=ledR;
+    state->fn_pin_R_Write(state->_activeLow ^ state->_Red);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -127,8 +134,8 @@ uint32_t RGB_R_Write(RGB_S *const state, RGB_LED_T ledR) {
 uint32_t RGB_G_Write(RGB_S *const state, RGB_LED_T ledG) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
-    state->_G=ledG;
-    state->_RGB_pin_G_Write(state->_activeLow ^ state->_G);
+    state->_Green=ledG;
+    state->fn_pin_G_Write(state->_activeLow ^ state->_Green);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -153,8 +160,8 @@ uint32_t RGB_G_Write(RGB_S *const state, RGB_LED_T ledG) {
 uint32_t RGB_B_Write(RGB_S *const state, RGB_LED_T ledB) {
   uint32_t error = RGB_ERROR_NONE;
   if(state->_init) {
-    state->_B=ledB;
-    state->_RGB_pin_B_Write(state->_activeLow ^ state->_B);
+    state->_Blue=ledB;
+    state->fn_pin_B_Write(state->_activeLow ^ state->_Blue);
   } else {
     error = RGB_ERROR_INIT;
   }
@@ -174,7 +181,7 @@ uint32_t RGB_B_Write(RGB_S *const state, RGB_LED_T ledB) {
 *  Error code of the operation
 *******************************************************************************/
 uint32_t RGB_R_Toggle(RGB_S *const state){
-  return RGB_R_Write(state, !state->_R); 
+  return RGB_R_Write(state, !state->_Red); 
 }
 
 /*******************************************************************************
@@ -190,7 +197,7 @@ uint32_t RGB_R_Toggle(RGB_S *const state){
 *  Error code of the operation
 *******************************************************************************/
 uint32_t RGB_G_Toggle(RGB_S *const state){
-  return RGB_G_Write(state, !state->_G); 
+  return RGB_G_Write(state, !state->_Green); 
 }
 
 /*******************************************************************************
@@ -206,7 +213,7 @@ uint32_t RGB_G_Toggle(RGB_S *const state){
 *  Error code of the operation
 *******************************************************************************/
 uint32_t RGB_B_Toggle(RGB_S *const state){
-  return RGB_B_Write(state, !state->_B); 
+  return RGB_B_Write(state, !state->_Blue); 
 }
 
 /* [] END OF FILE */
