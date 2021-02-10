@@ -42,6 +42,7 @@
   #define TCA9535_ACTIVE_HIGH       (0x0000)   /* All ports active high */
   #define TCA9535_ACTIVE_LOW        (0xFFFF)   /* All ports active low */
   
+    
   /***************************************
   * Enumerated Types
   ***************************************/

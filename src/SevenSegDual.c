@@ -87,9 +87,7 @@ uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, COMMS_I2C_S *i2c, uint8_t addr)
     /* configure as Output */
     error |= TCA9535_setMode(&state->_tca, TCA9535_MODE_OUTPUT);
     /* Display Blank */
-    state->_char0 = SEVENSEG_CHAR_BLANK | SEVENSEG_CHAR_DOT;
-    state->_char1 = SEVENSEG_CHAR_BLANK;
-    error |= SEVENSEG_update(state);
+    error |= SEVENSEG_blank(state);
 
   } else {
     state->error = error;
@@ -110,7 +108,7 @@ uint32_t SEVENSEG_start(SEVENSEG_STATE_S* state, COMMS_I2C_S *i2c, uint8_t addr)
 *******************************************************************************/
 uint32_t SEVENSEG_update(SEVENSEG_STATE_S* state){
   uint16_t ctrl = (state->_char1 << SHIFT_BYTE_ONE) | state->_char0;
-  return TCA9535_write(&state->_tca, ctrl);
+  return TCA9535_write(&state->_tca, ~ctrl);
 }
 
 /*******************************************************************************
@@ -192,10 +190,10 @@ uint32_t SEVENSEG_displayNum(SEVENSEG_STATE_S* state, uint16_t val) {
       msb = val / 10;
       dpm = true;
     } 
-    /* >=10, Represent as "XY" if integer, or "XY."" if non-integer */
+    /* >=10, Represent as "XY" if integer, or "XY." if non-integer */
     else {
       dpl = val % 10;
-      lsb = val / 10;
+      lsb = (val / 10) % 10;
       msb = val / 100;
     }
     /* Update character numbers */
@@ -209,6 +207,27 @@ uint32_t SEVENSEG_displayNum(SEVENSEG_STATE_S* state, uint16_t val) {
   }
 
   return error; 
+}
+
+
+/*******************************************************************************
+* Function Name: SEVENSEG_blank()
+****************************************************************************//**
+* \brief Blanks the display
+*  
+* \param state [In/Out] Pointer to the state struct for the Seven Segment 
+*
+
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SEVENSEG_blank(SEVENSEG_STATE_S* state) {
+    uint32_t error = SEVENSEG_ERROR_NONE;
+    /* Display Blank */
+    state->_char0 = SEVENSEG_CHAR_BLANK;
+    state->_char1 = SEVENSEG_CHAR_BLANK;
+    error |= SEVENSEG_update(state);
+    return error;
 }
 
 

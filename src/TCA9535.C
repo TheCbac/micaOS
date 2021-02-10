@@ -21,7 +21,6 @@
 #include "micaCommon.h"
 
 
-
 /*******************************************************************************
 * Function Name: TCA9535_writeReg()
 ****************************************************************************//**
@@ -146,7 +145,7 @@ uint32_t TCA9535_start(TCA9535_STATE_S* state, COMMS_I2C_S* i2c, uint8_t i2cAddr
     }
   }
   else {
-    error |= COMMS_ERROR_START | COMMS_ERROR_I2C; 
+    error |= COMMS_ERROR_START; 
   }
 
   return error;

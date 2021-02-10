@@ -41,11 +41,12 @@
     /***************************************
     * Function declarations 
     ***************************************/
-    uint32_t i2cPsoc_start(COMMS_I2C_S *i2c);
+    uint32_t i2cPsoc_start(COMMS_I2C_S *const i2c);
     uint32_t i2cPsoc_write(uint8_t deviceAddr, uint8_t regAddr, uint8_t val);
     uint32_t i2cPsoc_writeCmd(uint8_t deviceAddr, uint8_t cmd);
     uint32_t i2cPsoc_writeArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *array, uint16_t len);
     uint32_t i2cPsoc_read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *result);
+    uint32_t i2cPsoc_readCmd(uint8_t deviceAddr, uint8_t *result, uint16_t len); 
     uint32_t i2cPsoc_readArray(uint8_t deviceAddr, uint8_t regAddr, uint8_t *resultArray, uint16_t len);   /**< Read multiple values from a device */
 
 #endif /* PSOC_I2C_H */

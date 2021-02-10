@@ -63,6 +63,7 @@ uint32_t Comms_validateI2C(COMMS_I2C_S *i2c){
   error |= (i2c->writeCmd == NULL)    ? COMMS_ERROR_WRITE_CMD : COMMS_ERROR_NONE;
   error |= (i2c->writeArray == NULL)  ? COMMS_ERROR_WRITE_ARRAY : COMMS_ERROR_NONE;
   error |= (i2c->read == NULL)        ? COMMS_ERROR_READ : COMMS_ERROR_NONE;
+  error |= (i2c->readCmd == NULL)     ? COMMS_ERROR_READ_CMD : COMMS_ERROR_NONE;
   error |= (i2c->readArray == NULL)   ? COMMS_ERROR_READ_ARRAY : COMMS_ERROR_NONE;
   return error;
 }
