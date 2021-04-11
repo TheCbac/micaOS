@@ -102,6 +102,7 @@
   uint32_t SEVENSEG_update(SEVENSEG_STATE_S* state);
   uint32_t SEVENSEG_mapChar(uint8_t val, uint8_t * display);
   uint32_t SEVENSEG_displayNum(SEVENSEG_STATE_S* state, uint16_t val);
+  uint32_t SEVENSEG_blank(SEVENSEG_STATE_S* state);
   
 
 

@@ -1,0 +1,113 @@
+CHANGE LOG
+libMICA - MICA Components - v1
+
+2018.10.02 - CC 
+* Need to add to packet definitions: commands
+* Need to add 'start' function to uart api
+* create test user interface
+* Created a yo generator app - see /Dropbox/MICA/Creator/generators/generator-mica/
+
+2018.10.01 - CC
+* Update packet test to conform to v1.4
+    * Remove "Invalid Module Flag"
+* Add application file generator
+
+2018.09.17 - CC
+* Change packets to v1.4
+
+* Add file generators
+    * main
+    * application file
+    * Syntax:
+        * ISR
+        * Switch
+        * enum
+        * struct
+        * test case
+    * Uart example
+
+
+
+2018.08.23 - CC
+Goals for the day:
+* Establish comms between host (DB) and peripheral (IMU)
+* Support cube comms relaying BLE from APP to IMU
+* Continue refactor of IMU project
+    * Create Upgrade-able stack component
+    * System Timer
+* Create component and handlers for commands
+    * IMU: 
+        Who am i 
+        
+
+2018.08.22 CC
+* Writing unit tests for the packets in DriveBot                            ✓
+* Should add an sprintf equivalent to uartApi
+* PICKUP: fix creation tests - No reason to use the TX payloadMax param     ✓
+* Do NOT change any of the process buffer addresses
+* PICKUP: test communication between two device
+
+
+2018.08.08 CC
+# Buttons.c/h
+* Add wasButtonReleased                                  ✓
+* Add release isr callback                               ✓
+# packets.h
+* Make packet structures conform to v1.3 standard
+    * Merge PACKET_RECEIVE_S and PACKET_SEND_S
+    * Update BUFFER_SEND_S and BUFFER_RECEIVE_S
+
+2018.08.03 CC
+* Create a testing component
+* Move the Packet unit tests to own project
+
+2018.08.01 CC
+# packets.c
+* Move errors detecting to parse packets
+
+2018.07.31 CC
+# TODO - UART_API
+* Add macro for starting the designated UART
+    e.g. UART_USB_Start() -> usbUart_Start()
+# TODO - Packets
+* Switch to using heap for buffers
+* Double buffer Packets
+* Switch to flag errors
+
+2018.07.30 CC
+# PACKETS_v1_0
+* Modify packet struct to enable pure functions
+* Pick up on investigating why the receive side errors out
+* maybe split into send and receive packet format
+
+2018.07.25 CC 
+# MICA Components Library
+* Create a "Dual Quadrature Encoder"                        ✓
+* Revisit Packets component
+* Change function sendResponsePacket -> createResponse Packets
+    i.e. get rid of UART dependencies in the component
+* Build buffer and status into packet component
+
+# DriveBot v5
+* Abstract "boardTesting.c/.h" out of the design            ✓
+* Clean up all testing functions                            ✓
+
+2018.07.03 CC - PUSH_BUTTON
+* Create initial push button component                      ✓
+
+2018.06.11 CC - UART_API
+* change from functions to uart name and SCB option?
+
+2018.06.04 - BMX component CC
+* Create two accelerometer data types - float and int16     ✓
+* Create two gyroscope data types - float and int16         ✓
+* Convert Power states to enumerated types                  ✓
+* Create devices state structs                              ✓
+* Update BMX device functions                               ✓
+* Update ACC functions                                      ✓
+* Update GYR functions                                      ✓
+* Update MAG functions                                      ✓
+* Switch read functions to state variable not device specific (&imuState.acc -> &imuState)
+* Create inclinometer Component                             ✓
+* Add state check to read functions                         ✓
+

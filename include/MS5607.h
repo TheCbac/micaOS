@@ -76,15 +76,6 @@
     uint8_t _deviceAddr;     /**< Address of the device to communicate with */
     MS5607_DATA_T _convertType; /* The data type from the last read  */
     uint16_t _coeffs[MS5607_COEFFS_LEN];
-    // uint16_t _C1;         /**< Pressure sensitivity | SENST1 */
-    // uint16_t _C2;         /**< Pressure offset | OFFT1 */
-    // uint16_t _C3;         /**< Temperature coefficient of pressure sensitivity | TCS */
-    // uint16_t _C4;         /**< Temperature coefficient of pressure offset | TCO */
-    // uint16_t _C5;         /**< Reference temperature | TREF */
-    // uint16_t _C6;         /**< Temperature coefficient of the temperature | TEMPSENS */
-    // uint32_t _D1;         /**< Digital Pressure Value */
-    // uint32_t _D2;         /**< Digital Temperature Value */
-
   } MS5607_STATE_S;
   
   /***************************************
