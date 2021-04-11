@@ -12,11 +12,13 @@
 *   Header for TCA9535.c
 *
 * 2020.04.29  - Document Created
+* 2020.12.10    <sek> added _init structure member
 ********************************************************************************/
 
 /* Header Guard */
 #ifndef TCA9535_H
   #define TCA9535_H
+
   /***************************************
   * Included files
   ***************************************/
@@ -42,7 +44,6 @@
   #define TCA9535_ACTIVE_HIGH       (0x0000)   /* All ports active high */
   #define TCA9535_ACTIVE_LOW        (0xFFFF)   /* All ports active low */
   
-    
   /***************************************
   * Enumerated Types
   ***************************************/
@@ -55,21 +56,22 @@
     COMMS_I2C_S *i2c;     /**< Pointer to the I2C comms struct */      
     uint32_t error;         /**< Functions that exit with an error use this to transmit info out */
     uint8_t deviceAddr;     /**< Address of the device to communicate with */
+    bool _init;   /* initialization variable */
   } TCA9535_STATE_S;
   
+    extern const TCA9535_STATE_S TCA9535_STATE_DEFAULT_S;
   /***************************************
   * Function declarations 
   ***************************************/
-  uint32_t TCA9535_start(TCA9535_STATE_S* state, COMMS_I2C_S* i2c, uint8_t i2cAddr);
-  uint32_t TCA9535_writeReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t val);
-  uint32_t TCA9535_readReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t* val);
-  uint32_t TCA9535_setMode(TCA9535_STATE_S * state, uint16_t mode);
-  uint32_t TCA9535_setPolarity(TCA9535_STATE_S * state, uint16_t polarity);
-  uint32_t TCA9535_write(TCA9535_STATE_S * state, uint16_t val);
-  uint32_t TCA9535_read(TCA9535_STATE_S * state, uint16_t * val);
+    uint32_t TCA9535_start(TCA9535_STATE_S* state, COMMS_I2C_S* i2c, uint8_t i2cAddr);
+    uint32_t TCA9535_setMode(TCA9535_STATE_S * state, uint16_t mode);
+    uint32_t TCA9535_setPolarity(TCA9535_STATE_S * state, uint16_t polarity);
 
+    uint32_t TCA9535_write(TCA9535_STATE_S * state, uint16_t val);
+    uint32_t TCA9535_read(TCA9535_STATE_S * state, uint16_t * val);
 
-
+  //uint32_t TCA9535_writeReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t val);
+  //uint32_t TCA9535_readReg(TCA9535_STATE_S* state, uint8_t regAddr, uint16_t* val);
 
 #endif /* TCA9535_H */
 /* [] END OF FILE */
